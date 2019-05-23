@@ -1,0 +1,334 @@
+version: "3.6"
+services:
+
+  portainer:
+    image: portainer/portainer
+    container_name: portainer
+    restart: always
+    command: -H unix:///var/run/docker.sock
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${USERDIR}/docker/portainer/data:/data
+      - ${USERDIR}/docker/shared:/shared
+    environment:
+      - TZ=${TZ}
+    networks:
+      - traefik_proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=portainer"
+      - "traefik.frontend.rule=Host:portainer.${DOMAINNAME}"  
+      - "traefik.port=9000"
+      - "traefik.docker.network=traefik_proxy"
+      - "traefik.frontend.headers.SSLRedirect=true"
+      - "traefik.frontend.headers.STSSeconds=315360000"
+      - "traefik.frontend.headers.browserXSSFilter=true"
+      - "traefik.frontend.headers.contentTypeNosniff=true"
+      - "traefik.frontend.headers.forceSTSHeader=true"
+      - "traefik.frontend.headers.SSLHost=example.com"
+      - "traefik.frontend.headers.STSIncludeSubdomains=true"
+      - "traefik.frontend.headers.STSPreload=true"
+      - "traefik.frontend.headers.frameDeny=true"
+
+  organizr:
+    container_name: organizr
+    restart: always
+    image: lsiocommunity/organizr
+    volumes:
+      - ${USERDIR}/docker/organizr:/config
+      - ${USERDIR}/docker/shared:/shared
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    networks:
+      - traefik_proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=organizr"
+      - "traefik.frontend.rule=Host:organizr.${DOMAINNAME}"  
+      - "traefik.port=80"
+      - "traefik.docker.network=traefik_proxy"
+      - "traefik.frontend.headers.SSLRedirect=true"
+      - "traefik.frontend.headers.STSSeconds=315360000"
+      - "traefik.frontend.headers.browserXSSFilter=true"
+      - "traefik.frontend.headers.contentTypeNosniff=true"
+      - "traefik.frontend.headers.forceSTSHeader=true"
+      - "traefik.frontend.headers.SSLHost=${DOMAINNAME}"
+      - "traefik.frontend.headers.STSIncludeSubdomains=true"
+      - "traefik.frontend.headers.STSPreload=true"
+      - "traefik.frontend.headers.frameDeny=true"
+
+  watchtower:
+    container_name: watchtower
+    restart: always
+    image: v2tec/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --schedule "0 0 4 * * *" --cleanup
+
+  unifi-controller:
+    image: linuxserver/unifi-controller
+    container_name: unifi-controller
+    restart: always
+    volumes:
+      - ${USERDIR}/docker/unifi:/config
+      - ${USERDIR}/docker/shared:/shared
+    ports:
+      - target: 3478
+        published: 3478
+        protocol: udp
+        mode: host
+      - target: 10001
+        published: 10001
+        protocol: udp
+        mode: host
+      - target: 8080
+        published: 8080
+        protocol: tcp
+        mode: host
+      - target: 8081
+        published: 8081
+        protocol: tcp
+        mode: host
+      - target: 8443
+        published: 8443
+        protocol: tcp
+        mode: host
+      - target: 8880
+        published: 8880
+        protocol: tcp
+        mode: host
+      - target: 6789
+        published: 6789
+        protocol: tcp
+        mode: host
+    networks:
+      - traefik_proxy
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.tags=frontend"
+      - "traefik.frontend.passHostHeader=true"
+      - "traefik.admin.backend=unifi"
+      - "traefik.admin.frontend.rule=Host:unifi.${DOMAINNAME}"
+      - "traefik.admin.port=8443"
+      - "traefik.admin.protocol=https"
+
+  traefik:
+    hostname: traefik
+    image: traefik:latest
+    container_name: traefik
+    restart: always
+    domainname: ${DOMAINNAME}
+    networks:
+      - default
+      - traefik_proxy
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8000:8080"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - CF_API_EMAIL=${CLOUDFLARE_EMAIL}
+      - CF_API_KEY=${CLOUDFLARE_API_KEY}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=traefik"
+      - "traefik.frontend.rule=Host:traefik.${DOMAINNAME}"  
+      - "traefik.port=8080"
+      - "traefik.docker.network=traefik_proxy"
+      - "traefik.frontend.headers.SSLRedirect=true"
+      - "traefik.frontend.headers.STSSeconds=315360000"
+      - "traefik.frontend.headers.browserXSSFilter=true"
+      - "traefik.frontend.headers.contentTypeNosniff=true"
+      - "traefik.frontend.headers.forceSTSHeader=true"
+      - "traefik.frontend.headers.SSLHost=${DOMAINNAME}"
+      - "traefik.frontend.headers.STSIncludeSubdomains=true"
+      - "traefik.frontend.headers.STSPreload=true"
+      - "traefik.frontend.headers.frameDeny=true"
+      - "traefik.frontend.auth.basic.users=${HTTP_USERNAME}:${HTTP_PASSWORD}"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ${USERDIR}/docker/traefik:/etc/traefik
+      - ${USERDIR}/docker/shared:/shared
+
+  emby:
+    container_name: emby
+    restart: always
+    image: emby/embyserver:beta
+    volumes:
+      - ${USERDIR}/docker/emby:/config
+      - /storage:/storage
+      - ${USERDIR}/docker/shared:/shared
+    ports:
+      - "8096:8096/tcp"
+    environment:
+      - UID=${PUID}
+      - GID=${PGID}
+      - TZ=${TZ}
+      - GIDLIST=${PGID},44
+    devices:
+      - "/dev/dri/renderD128:/dev/dri/renderD128" 
+    networks:
+      - traefik_proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=emby"
+      - "traefik.frontend.rule=Host:media.${DOMAINNAME}"
+      - "traefik.port=8096"
+      - "traefik.protocol=http"
+      - "traefik.docker.network=traefik_proxy"
+      - "traefik.frontend.passHostHeader=true"
+
+  mariadb:
+    image: mariadb:latest
+    container_name: mariadb
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=&{MYSQL_ROOT_PASSWORD}
+      - UID=${PUID}
+      - GID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${USERDIR}/docker/mariadb:/var/lib/mysql
+    networks:
+      - default
+
+  adminer:
+    image: adminer:latest
+    container_name: adminer
+    restart: always
+    labels:
+      - "traefik.backend=adminer"
+      - "traefik.frontend.rule=Host:adminer.${DOMAINNAME}"
+      - "traefik.docker.network=traefik_proxy"
+      - "traefik.port=8080"
+      - "traefik.enable=true"
+    networks:
+      - traefik_proxy
+      - default
+    depends_on:
+      - mariadb
+    environment:
+      - TZ=${TZ}
+
+  wordpress-frank:
+    image: wordpress:php7.3-fpm
+    container_name: wordpress-frank
+    restart: always
+    volumes:
+      - ${USERDIR}/Websites/frankw.net:/var/www/html
+    environment:
+      - WORDPRESS_DB_HOST=mariadb
+      - WORDPRESS_DB_USER=${WORDPRESS_DB_FW_USER}
+      - WORDPRESS_DB_PASSWORD=${WORDPRESS_DB_FW_PASSWORD}
+      - WORDPRESS_DB_NAME=${WORDPRESS_DB_FW_NAME}
+      - TZ=${TZ}
+    networks:
+      - default
+    depends_on:
+      - mariadb
+
+  wordpress-ls:
+    image: wordpress:php7.3-fpm
+    container_name: wordpress-ls
+    restart: always
+    volumes:
+      - ${USERDIR}/Websites/livingservices:/var/www/html
+    environment:
+      - WORDPRESS_DB_HOST=mariadb
+      - WORDPRESS_DB_USER=${WORDPRESS_DB_LS_USER}
+      - WORDPRESS_DB_PASSWORD=${WORDPRESS_DB_LS_PASSWORD}
+      - WORDPRESS_DB_NAME=${WORDPRESS_DB_LS_NAME}
+      - TZ=${TZ}
+    networks:
+      - default
+    depends_on:
+      - mariadb
+
+  nginx-frank:
+    image: nginx
+    container_name: nginx-frank
+    restart: always
+    volumes:
+      - ${USERDIR}/docker/nginx/frankw-net.conf:/etc/nginx/conf.d/frankw-net.conf
+      - ${USERDIR}/Websites/frankw.net:/var/www/html:ro
+    networks:
+      - traefik_proxy
+      - default
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=nginx-frank"
+      - "traefik.frontend.rule=Host:${DOMAINNAME}"
+      - "traefik.frontend.entryPoints=http,https"
+      - "traefik.frontend.headers.SSLRedirect=true"
+      - "traefik.docker.network=traefik_proxy"
+      - "traefik.port=80"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    depends_on:
+      - wordpress-frank
+
+  nginx-ls:
+    image: nginx
+    container_name: nginx-ls
+    restart: always
+    volumes:
+      - ${USERDIR}/docker/nginx/livingservices-ca.conf:/etc/nginx/conf.d/livingservices-ca.conf
+      - ${USERDIR}/Websites/livingservices:/var/www/html:ro
+    networks:
+      - traefik_proxy
+      - default
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=nginx-ls"
+      - "traefik.frontend.rule=Host:livingservices.ca"
+      - "traefik.frontend.entryPoints=http,https"
+      - "traefik.frontend.headers.SSLRedirect=true"
+      - "traefik.docker.network=traefik_proxy"
+      - "traefik.port=80"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    depends_on:
+      - wordpress-ls
+
+  deluge:
+    image: linuxserver/deluge
+    restart: unless-stopped
+    container_name: deluge
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${USERDIR}/docker/deluge:/config
+      - ${USERDIR}/Deluge:/downloads
+    ports:
+      - "54700:54700"
+      - "54700:54700/udp"
+    networks:
+      - traefik_proxy
+      - default
+    labels:
+      - "traefik.backend=deluge"
+      - "traefik.frontend.rule=Host:deluge.${DOMAINNAME}"
+      - "traefik.docker.network=traefik_proxy"
+      - "traefik.port=8112"
+      - "traefik.enable=true"
+
+networks:
+  traefik_proxy:
+    external:
+      name: traefik_proxy
+  default:
+    driver: bridge
