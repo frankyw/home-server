@@ -1,6 +1,31 @@
 version: "3.6"
 services:
 
+  netdata:
+    image: netdata/netdata
+    container_name: netdata
+    hostname: netdata.${DOMAINNAME}
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - apparmor:unconfined
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    networks:
+      - traefik_proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=netdata"
+      - "traefik.frontend.rule=Host:netdata.${DOMAINNAME}"  
+      - "traefik.port=19999"
+      - "traefik.docker.network=traefik_proxy"
+
   portainer:
     image: portainer/portainer
     container_name: portainer
