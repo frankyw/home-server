@@ -1,29 +1,53 @@
 version: "3.6"
 services:
 
-  netdata:
-    image: netdata/netdata
-    container_name: netdata
-    hostname: netdata.${DOMAINNAME}
-    cap_add:
-      - SYS_PTRACE
-    security_opt:
-      - apparmor:unconfined
+  transmission:
+    image: linuxserver/transmission
+    container_name: transmission
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - TRANSMISSION_WEB_HOME=/transmission-web-control/
     volumes:
-      - /proc:/host/proc:ro
-      - /sys:/host/sys:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ${USERDIR}/docker/transmission:/config
+      - ${USERDIR}/TransmissionDL:/downloads
+    ports:
+      - 55700:55700
+      - 9091:9091
+      - 55700:55700/udp
+    restart: unless-stopped
+    networks:
+      - traefik_proxy
+      - default
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=transmission"
+      - "traefik.frontend.rule=Host:transmission.${DOMAINNAME}"  
+      - "traefik.port=9091"
+      - "traefik.docker.network=traefik_proxy"   
+
+  filebot-node:
+    image: rednoah/filebot:node
+    container_name: filebot-node
+    #build: ${USERDIR}/dockerbuilds/filebot-node
+    restart: always
+    volumes:
+      - ${USERDIR}/docker/filebot:/data
+      - ${USERDIR}/TransmissionDL:/downloads
+      - /storage:/storage
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
     networks:
       - traefik_proxy
+      - default
     labels:
       - "traefik.enable=true"
-      - "traefik.backend=netdata"
-      - "traefik.frontend.rule=Host:netdata.${DOMAINNAME}"  
-      - "traefik.port=19999"
+      - "traefik.backend=filebot-node"
+      - "traefik.frontend.rule=Host:filebot.${DOMAINNAME}"  
+      - "traefik.port=5452"
       - "traefik.docker.network=traefik_proxy"
 
   portainer:
@@ -249,6 +273,7 @@ services:
     restart: always
     volumes:
       - ${USERDIR}/Websites/frankw.net:/var/www/html
+      - ${USERDIR}/docker/wordpress/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
     environment:
       - WORDPRESS_DB_HOST=mariadb
       - WORDPRESS_DB_USER=${WORDPRESS_DB_FW_USER}
@@ -266,6 +291,7 @@ services:
     restart: always
     volumes:
       - ${USERDIR}/Websites/livingservices:/var/www/html
+      - ${USERDIR}/docker/wordpress/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
     environment:
       - WORDPRESS_DB_HOST=mariadb
       - WORDPRESS_DB_USER=${WORDPRESS_DB_LS_USER}
