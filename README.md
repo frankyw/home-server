@@ -10,6 +10,8 @@ The following containers are being run:
 
 * nginx
 * linuxserver/deluge
+* linuxserver/transmission
+* rednoah/filebot:node
 * adminer:latest
 * wordpress:php7.3-fpm
 * mariadb:latest
