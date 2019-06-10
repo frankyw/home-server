@@ -1,7 +1,5 @@
 # frankyw/home-server
-![Code Size](https://img.shields.io/github/languages/code-size/frankyw/home-server.svg?style=plastic)
 
-## Intro
 This is a repository to verion control and document my journey from one Ubuntu server with a multitude of apps running on it, to complete docker containerization.
 
 ## Apps
