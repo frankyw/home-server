@@ -4,6 +4,7 @@ services:
   flexget:
     image: wiserain/flexget
     container_name: flexget
+    restart: always
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
