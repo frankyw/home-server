@@ -1,6 +1,39 @@
 version: "3.6"
 services:
 
+  flexget:
+    image: wiserain/flexget
+    container_name: flexget
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - FG_WEBUI_PASSWD=${FLEXGET_PASSWORD}
+      - FG_LOG_LEVEL=verbose
+    volumes:
+      - ${USERDIR}/docker/flexget:/config
+      - /storage:/storage
+    ports:
+      - 5050:5050
+    networks:
+      - traefik_proxy
+      - default
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=flexget"
+      - "traefik.frontend.rule=Host:flexget.${DOMAINNAME}"  
+      - "traefik.port=5050"
+      - "traefik.docker.network=traefik_proxy"  
+      - "traefik.frontend.headers.SSLRedirect=true"
+      - "traefik.frontend.headers.STSSeconds=315360000"
+      - "traefik.frontend.headers.browserXSSFilter=true"
+      - "traefik.frontend.headers.contentTypeNosniff=true"
+      - "traefik.frontend.headers.forceSTSHeader=true"
+      - "traefik.frontend.headers.SSLHost=${DOMAINNAME}"
+      - "traefik.frontend.headers.STSIncludeSubdomains=true"
+      - "traefik.frontend.headers.STSPreload=true"
+      - "traefik.frontend.headers.frameDeny=true"
+
   transmission:
     image: linuxserver/transmission
     container_name: transmission
@@ -25,7 +58,16 @@ services:
       - "traefik.backend=transmission"
       - "traefik.frontend.rule=Host:transmission.${DOMAINNAME}"  
       - "traefik.port=9091"
-      - "traefik.docker.network=traefik_proxy"   
+      - "traefik.docker.network=traefik_proxy"
+      - "traefik.frontend.headers.SSLRedirect=true"
+      - "traefik.frontend.headers.STSSeconds=315360000"
+      - "traefik.frontend.headers.browserXSSFilter=true"
+      - "traefik.frontend.headers.contentTypeNosniff=true"
+      - "traefik.frontend.headers.forceSTSHeader=true"
+      - "traefik.frontend.headers.SSLHost=${DOMAINNAME}"
+      - "traefik.frontend.headers.STSIncludeSubdomains=true"
+      - "traefik.frontend.headers.STSPreload=true"
+      - "traefik.frontend.headers.frameDeny=true"  
 
   filebot-node:
     image: rednoah/filebot:node
@@ -49,6 +91,15 @@ services:
       - "traefik.frontend.rule=Host:filebot.${DOMAINNAME}"  
       - "traefik.port=5452"
       - "traefik.docker.network=traefik_proxy"
+      - "traefik.frontend.headers.SSLRedirect=true"
+      - "traefik.frontend.headers.STSSeconds=315360000"
+      - "traefik.frontend.headers.browserXSSFilter=true"
+      - "traefik.frontend.headers.contentTypeNosniff=true"
+      - "traefik.frontend.headers.forceSTSHeader=true"
+      - "traefik.frontend.headers.SSLHost=${DOMAINNAME}"
+      - "traefik.frontend.headers.STSIncludeSubdomains=true"
+      - "traefik.frontend.headers.STSPreload=true"
+      - "traefik.frontend.headers.frameDeny=true"
 
   portainer:
     image: portainer/portainer
@@ -259,6 +310,15 @@ services:
       - "traefik.docker.network=traefik_proxy"
       - "traefik.port=8080"
       - "traefik.enable=true"
+      - "traefik.frontend.headers.SSLRedirect=true"
+      - "traefik.frontend.headers.STSSeconds=315360000"
+      - "traefik.frontend.headers.browserXSSFilter=true"
+      - "traefik.frontend.headers.contentTypeNosniff=true"
+      - "traefik.frontend.headers.forceSTSHeader=true"
+      - "traefik.frontend.headers.SSLHost=${DOMAINNAME}"
+      - "traefik.frontend.headers.STSIncludeSubdomains=true"
+      - "traefik.frontend.headers.STSPreload=true"
+      - "traefik.frontend.headers.frameDeny=true"
     networks:
       - traefik_proxy
       - default
@@ -320,6 +380,7 @@ services:
       - "traefik.frontend.entryPoints=http,https"
       - "traefik.frontend.headers.SSLRedirect=true"
       - "traefik.docker.network=traefik_proxy"
+      - "traefik.frontend.passHostHeader=true"
       - "traefik.port=80"
     environment:
       - PUID=${PUID}
@@ -345,6 +406,7 @@ services:
       - "traefik.frontend.entryPoints=http,https"
       - "traefik.frontend.headers.SSLRedirect=true"
       - "traefik.docker.network=traefik_proxy"
+      - "traefik.frontend.passHostHeader=true"
       - "traefik.port=80"
     environment:
       - PUID=${PUID}
@@ -376,6 +438,15 @@ services:
       - "traefik.docker.network=traefik_proxy"
       - "traefik.port=8112"
       - "traefik.enable=true"
+      - "traefik.frontend.headers.SSLRedirect=true"
+      - "traefik.frontend.headers.STSSeconds=315360000"
+      - "traefik.frontend.headers.browserXSSFilter=true"
+      - "traefik.frontend.headers.contentTypeNosniff=true"
+      - "traefik.frontend.headers.forceSTSHeader=true"
+      - "traefik.frontend.headers.SSLHost=${DOMAINNAME}"
+      - "traefik.frontend.headers.STSIncludeSubdomains=true"
+      - "traefik.frontend.headers.STSPreload=true"
+      - "traefik.frontend.headers.frameDeny=true"
 
 networks:
   traefik_proxy:
