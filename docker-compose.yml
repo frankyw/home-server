@@ -1,6 +1,30 @@
 version: "3.6"
 services:
 
+  cadvisor:
+    image: google/cadvisor:latest
+    container_name: cadvisor
+    volumes:
+    - /:/rootfs:ro
+    - /var/run:/var/run:rw
+    - /sys:/sys:ro
+    - /var/lib/docker/:/var/lib/docker:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=cadvisor"
+      - "traefik.frontend.rule=Host:cadvisor.${DOMAINNAME}"  
+      - "traefik.port=8080"
+      - "traefik.docker.network=traefik_proxy"  
+      - "traefik.frontend.headers.SSLRedirect=true"
+      - "traefik.frontend.headers.STSSeconds=315360000"
+      - "traefik.frontend.headers.browserXSSFilter=true"
+      - "traefik.frontend.headers.contentTypeNosniff=true"
+      - "traefik.frontend.headers.forceSTSHeader=true"
+      - "traefik.frontend.headers.SSLHost=${DOMAINNAME}"
+      - "traefik.frontend.headers.STSIncludeSubdomains=true"
+      - "traefik.frontend.headers.STSPreload=true"
+      - "traefik.frontend.headers.frameDeny=true"
+
   flexget:
     image: wiserain/flexget
     container_name: flexget
@@ -10,7 +34,7 @@ services:
       - PGID=${PGID}
       - TZ=${TZ}
       - FG_WEBUI_PASSWD=${FLEXGET_PASSWORD}
-      - FG_LOG_LEVEL=verbose
+      - FG_LOG_LEVEL=info
     volumes:
       - ${USERDIR}/docker/flexget:/config
       - /storage:/storage
@@ -101,6 +125,7 @@ services:
       - "traefik.frontend.headers.STSIncludeSubdomains=true"
       - "traefik.frontend.headers.STSPreload=true"
       - "traefik.frontend.headers.frameDeny=true"
+      - "traefik.frontend.auth.basic.users=${HTTP_USERNAME}:${HTTP_PASSWORD}"
 
   portainer:
     image: portainer/portainer
@@ -130,6 +155,7 @@ services:
       - "traefik.frontend.headers.STSIncludeSubdomains=true"
       - "traefik.frontend.headers.STSPreload=true"
       - "traefik.frontend.headers.frameDeny=true"
+      - "traefik.frontend.auth.basic.users=${HTTP_USERNAME}:${HTTP_PASSWORD}"
 
   watchtower:
     container_name: watchtower
@@ -259,16 +285,16 @@ services:
       - "traefik.frontend.passHostHeader=true"
 
   mariadb:
-    image: mariadb:latest
+    image: linuxserver/mariadb
     container_name: mariadb
     restart: always
     environment:
-      - MYSQL_ROOT_PASSWORD=&{MYSQL_ROOT_PASSWORD}
-      - UID=${PUID}
-      - GID=${PGID}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - PUID=${PUID}
+      - PGID=${PGID}
       - TZ=${TZ}
     volumes:
-      - ${USERDIR}/docker/mariadb:/var/lib/mysql
+      - ${USERDIR}/docker/mariadb:/config
     networks:
       - default
 
@@ -374,7 +400,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.backend=nginx-ls"
-      - "traefik.frontend.rule=Host:livingservices.ca"
+      - "traefik.frontend.rule=Host:${LSDOMAINNAME}"
       - "traefik.frontend.entryPoints=http,https"
       - "traefik.frontend.headers.SSLRedirect=true"
       - "traefik.docker.network=traefik_proxy"
@@ -388,7 +414,7 @@ services:
       - wordpress-ls
 
   deluge:
-    image: linuxserver/deluge
+    image: linuxserver/deluge:5b398f77-ls22
     restart: unless-stopped
     container_name: deluge
     environment:
