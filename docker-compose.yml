@@ -1,14 +1,59 @@
 version: "3.6"
 services:
 
+  adguard-home:
+    image: adguard/adguardhome
+    container_name: adguard-home
+    restart: always
+    volumes:
+      - ${USERDIR}/docker/adguard:/opt/adguardhome/work
+      - ${USERDIR}/docker/adguard:/opt/adguardhome/conf
+    ports:
+      - "53:53"
+      - "53:53/udp"
+    networks:
+      - traefik_proxy
+      - default
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=adguard-home"
+      - "traefik.frontend.rule=Host:adguard.${DOMAINNAME}"  
+      - "traefik.port=80"
+      - "traefik.docker.network=traefik_proxy"
+      - "traefik.frontend.passHostHeader=true"
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    restart: always
+    environment:
+      - PMA_HOST=mariadb
+    depends_on:
+      - mariadb
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=phpmyadmin"
+      - "traefik.frontend.rule=Host:phpma.${DOMAINNAME}"  
+      - "traefik.port=80"
+      - "traefik.docker.network=traefik_proxy"  
+      - "traefik.frontend.headers.SSLRedirect=true"
+      - "traefik.frontend.headers.STSSeconds=315360000"
+      - "traefik.frontend.headers.browserXSSFilter=true"
+      - "traefik.frontend.headers.contentTypeNosniff=true"
+      - "traefik.frontend.headers.forceSTSHeader=true"
+      - "traefik.frontend.headers.SSLHost=${DOMAINNAME}"
+      - "traefik.frontend.headers.STSIncludeSubdomains=true"
+      - "traefik.frontend.headers.STSPreload=true"
+      - "traefik.frontend.headers.frameDeny=true"
+
   cadvisor:
     image: google/cadvisor:latest
     container_name: cadvisor
     volumes:
-    - /:/rootfs:ro
-    - /var/run:/var/run:rw
-    - /sys:/sys:ro
-    - /var/lib/docker/:/var/lib/docker:ro
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
     labels:
       - "traefik.enable=true"
       - "traefik.backend=cadvisor"
@@ -128,7 +173,7 @@ services:
       - "traefik.frontend.auth.basic.users=${HTTP_USERNAME}:${HTTP_PASSWORD}"
 
   portainer:
-    image: portainer/portainer
+    image: portainer/portainer:1.21.0
     container_name: portainer
     restart: always
     command: -H unix:///var/run/docker.sock
@@ -155,7 +200,6 @@ services:
       - "traefik.frontend.headers.STSIncludeSubdomains=true"
       - "traefik.frontend.headers.STSPreload=true"
       - "traefik.frontend.headers.frameDeny=true"
-      - "traefik.frontend.auth.basic.users=${HTTP_USERNAME}:${HTTP_PASSWORD}"
 
   watchtower:
     container_name: watchtower
@@ -298,76 +342,34 @@ services:
     networks:
       - default
 
-  adminer:
-    image: adminer:latest
-    container_name: adminer
-    restart: always
-    labels:
-      - "traefik.backend=adminer"
-      - "traefik.frontend.rule=Host:adminer.${DOMAINNAME}"
-      - "traefik.docker.network=traefik_proxy"
-      - "traefik.port=8080"
-      - "traefik.enable=true"
-      - "traefik.frontend.headers.SSLRedirect=true"
-      - "traefik.frontend.headers.STSSeconds=315360000"
-      - "traefik.frontend.headers.browserXSSFilter=true"
-      - "traefik.frontend.headers.contentTypeNosniff=true"
-      - "traefik.frontend.headers.forceSTSHeader=true"
-      - "traefik.frontend.headers.SSLHost=${DOMAINNAME}"
-      - "traefik.frontend.headers.STSIncludeSubdomains=true"
-      - "traefik.frontend.headers.STSPreload=true"
-      - "traefik.frontend.headers.frameDeny=true"
-    networks:
-      - traefik_proxy
-      - default
-    depends_on:
-      - mariadb
-    environment:
-      - TZ=${TZ}
-
-  wordpress-frank:
-    image: wordpress:php7.3-fpm
-    container_name: wordpress-frank
-    restart: always
-    volumes:
-      - ${USERDIR}/Websites/frankw.net:/var/www/html
-      - ${USERDIR}/docker/wordpress/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
-    environment:
-      - WORDPRESS_DB_HOST=mariadb
-      - WORDPRESS_DB_USER=${WORDPRESS_DB_FW_USER}
-      - WORDPRESS_DB_PASSWORD=${WORDPRESS_DB_FW_PASSWORD}
-      - WORDPRESS_DB_NAME=${WORDPRESS_DB_FW_NAME}
-      - TZ=${TZ}
-    networks:
-      - default
-    depends_on:
-      - mariadb
-
-  wordpress-ls:
-    image: wordpress:php7.3-fpm
-    container_name: wordpress-ls
-    restart: always
-    volumes:
-      - ${USERDIR}/Websites/livingservices:/var/www/html
-      - ${USERDIR}/docker/wordpress/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
-    environment:
-      - WORDPRESS_DB_HOST=mariadb
-      - WORDPRESS_DB_USER=${WORDPRESS_DB_LS_USER}
-      - WORDPRESS_DB_PASSWORD=${WORDPRESS_DB_LS_PASSWORD}
-      - WORDPRESS_DB_NAME=${WORDPRESS_DB_LS_NAME}
-      - TZ=${TZ}
-    networks:
-      - default
-    depends_on:
-      - mariadb
+  # wordpress-frank:
+  #   image: wordpress:php7.3-fpm
+  #   container_name: wordpress-frank
+  #   restart: always
+  #   volumes:
+  #     - ${USERDIR}/Websites/frankw.net:/var/www/html
+  #     - ${USERDIR}/docker/wordpress/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
+  #   environment:
+  #     - WORDPRESS_DB_HOST=mariadb
+  #     - WORDPRESS_DB_USER=${WORDPRESS_DB_FW_USER}
+  #     - WORDPRESS_DB_PASSWORD=${WORDPRESS_DB_FW_PASSWORD}
+  #     - WORDPRESS_DB_NAME=${WORDPRESS_DB_FW_NAME}
+  #     - TZ=${TZ}
+  #   networks:
+  #     - default
+  #   depends_on:
+  #     - mariadb
 
   nginx-frank:
-    image: nginx
+    image: linuxserver/nginx
     container_name: nginx-frank
-    restart: always
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
     volumes:
-      - ${USERDIR}/docker/nginx/frankw-net.conf:/etc/nginx/conf.d/frankw-net.conf
-      - ${USERDIR}/Websites/frankw.net:/var/www/html:ro
+      - ${USERDIR}/docker/nginx/frankw:/config
+    restart: unless-stopped
     networks:
       - traefik_proxy
       - default
@@ -380,38 +382,76 @@ services:
       - "traefik.docker.network=traefik_proxy"
       - "traefik.frontend.passHostHeader=true"
       - "traefik.port=80"
+
+  nginx-thcuk:
+    image: linuxserver/nginx
+    container_name: nginx-thcuk
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-    depends_on:
-      - wordpress-frank
-
-  nginx-ls:
-    image: nginx
-    container_name: nginx-ls
-    restart: always
     volumes:
-      - ${USERDIR}/docker/nginx/livingservices-ca.conf:/etc/nginx/conf.d/livingservices-ca.conf
-      - ${USERDIR}/Websites/livingservices:/var/www/html:ro
+      - ${USERDIR}/docker/nginx/thc:/config
+    restart: unless-stopped
     networks:
       - traefik_proxy
       - default
     labels:
       - "traefik.enable=true"
-      - "traefik.backend=nginx-ls"
+      - "traefik.backend=nginx-thcuk"
+      - "traefik.frontend.rule=Host:${THCDOMAINNAME}"
+      - "traefik.frontend.entryPoints=http,https"
+      - "traefik.frontend.headers.SSLRedirect=true"
+      - "traefik.docker.network=traefik_proxy"
+      - "traefik.frontend.passHostHeader=true"
+      - "traefik.port=80"
+
+  nginx-ls-dev:
+    image: linuxserver/nginx
+    container_name: nginx-ls-dev
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${USERDIR}/docker/nginx/ls:/config
+    restart: unless-stopped
+    networks:
+      - traefik_proxy
+      - default
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=nginx-ls-dev"
+      - "traefik.frontend.rule=Host:dev.${LSDOMAINNAME}"
+      - "traefik.frontend.entryPoints=http,https"
+      - "traefik.frontend.headers.SSLRedirect=true"
+      - "traefik.docker.network=traefik_proxy"
+      - "traefik.frontend.passHostHeader=true"
+      - "traefik.port=80"
+
+  nginx-ls-temp:
+    image: linuxserver/nginx
+    container_name: nginx-ls-temp
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${USERDIR}/docker/nginx/ls-temp:/config
+    restart: unless-stopped
+    networks:
+      - traefik_proxy
+      - default
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=nginx-ls-temp"
       - "traefik.frontend.rule=Host:${LSDOMAINNAME}"
       - "traefik.frontend.entryPoints=http,https"
       - "traefik.frontend.headers.SSLRedirect=true"
       - "traefik.docker.network=traefik_proxy"
       - "traefik.frontend.passHostHeader=true"
       - "traefik.port=80"
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-    depends_on:
-      - wordpress-ls
+
 
   deluge:
     image: linuxserver/deluge:5b398f77-ls22

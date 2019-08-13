@@ -6,17 +6,17 @@ This is a repository to verion control and document my journey from one Ubuntu s
 
 The following containers are being run:
 
+* google/cadvisor
 * wiserain/flexget
-* nginx
+* linuxserver/nginx
 * linuxserver/deluge
 * linuxserver/transmission
+* linuxserver/unifi-controller
 * rednoah/filebot:node
-* adminer:latest
-* wordpress:php7.3-fpm
 * mariadb:latest
 * traefik:latest
 * portainer/portainer
 * emby/embyserver:beta
-* linuxserver/unifi-controller
-* lsiocommunity/organizr
 * v2tec/watchtower
+* adguard/adguardhome
+* phpmyadmin/phpmyadmin
