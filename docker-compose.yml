@@ -49,6 +49,7 @@ services:
   cadvisor:
     image: google/cadvisor:latest
     container_name: cadvisor
+    restart: always
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:rw
@@ -262,7 +263,7 @@ services:
 
   traefik:
     hostname: traefik
-    image: traefik:latest
+    image: traefik:v1.7.16-alpine
     container_name: traefik
     restart: always
     domainname: ${DOMAINNAME}
@@ -341,24 +342,6 @@ services:
       - ${USERDIR}/docker/mariadb:/config
     networks:
       - default
-
-  # wordpress-frank:
-  #   image: wordpress:php7.3-fpm
-  #   container_name: wordpress-frank
-  #   restart: always
-  #   volumes:
-  #     - ${USERDIR}/Websites/frankw.net:/var/www/html
-  #     - ${USERDIR}/docker/wordpress/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
-  #   environment:
-  #     - WORDPRESS_DB_HOST=mariadb
-  #     - WORDPRESS_DB_USER=${WORDPRESS_DB_FW_USER}
-  #     - WORDPRESS_DB_PASSWORD=${WORDPRESS_DB_FW_PASSWORD}
-  #     - WORDPRESS_DB_NAME=${WORDPRESS_DB_FW_NAME}
-  #     - TZ=${TZ}
-  #   networks:
-  #     - default
-  #   depends_on:
-  #     - mariadb
 
   nginx-frank:
     image: linuxserver/nginx
@@ -451,7 +434,6 @@ services:
       - "traefik.docker.network=traefik_proxy"
       - "traefik.frontend.passHostHeader=true"
       - "traefik.port=80"
-
 
   deluge:
     image: linuxserver/deluge:5b398f77-ls22
