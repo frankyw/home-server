@@ -15,12 +15,15 @@ services:
       - traefik_proxy
       - default
     labels:
-      - "traefik.enable=true"
-      - "traefik.backend=adguard-home"
-      - "traefik.frontend.rule=Host:adguard.${DOMAINNAME}"  
-      - "traefik.port=80"
-      - "traefik.docker.network=traefik_proxy"
-      - "traefik.frontend.passHostHeader=true"
+      - traefik.enable=true
+      - traefik.http.routers.adguard.rule=Host(`adguard.${DOMAINNAME}`)
+      - traefik.http.routers.adguard.entrypoints=http
+      - traefik.http.routers.adguard-secure.rule=Host(`adguard.${DOMAINNAME}`)
+      - traefik.http.routers.adguard-secure.entrypoints=https
+      - traefik.http.routers.adguard-secure.tls=true
+      - traefik.http.services.adguard.loadbalancer.server.port=80
+      - traefik.docker.network=traefik_proxy
+      - traefik.http.routers.adguard.middlewares=sslredirect
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
@@ -30,21 +33,19 @@ services:
       - PMA_HOST=mariadb
     depends_on:
       - mariadb
+    networks:
+      - traefik_proxy
+      - default
     labels:
-      - "traefik.enable=true"
-      - "traefik.backend=phpmyadmin"
-      - "traefik.frontend.rule=Host:phpma.${DOMAINNAME}"  
-      - "traefik.port=80"
-      - "traefik.docker.network=traefik_proxy"  
-      - "traefik.frontend.headers.SSLRedirect=true"
-      - "traefik.frontend.headers.STSSeconds=315360000"
-      - "traefik.frontend.headers.browserXSSFilter=true"
-      - "traefik.frontend.headers.contentTypeNosniff=true"
-      - "traefik.frontend.headers.forceSTSHeader=true"
-      - "traefik.frontend.headers.SSLHost=${DOMAINNAME}"
-      - "traefik.frontend.headers.STSIncludeSubdomains=true"
-      - "traefik.frontend.headers.STSPreload=true"
-      - "traefik.frontend.headers.frameDeny=true"
+      - traefik.enable=true
+      - traefik.http.routers.phpma.rule=Host(`phpma.${DOMAINNAME}`)
+      - traefik.http.routers.phpma.entrypoints=http
+      - traefik.http.routers.phpma-secure.rule=Host(`phpma.${DOMAINNAME}`)
+      - traefik.http.routers.phpma-secure.entrypoints=https
+      - traefik.http.routers.phpma-secure.tls=true
+      - traefik.http.services.phpma.loadbalancer.server.port=80
+      - traefik.docker.network=traefik_proxy
+      - traefik.http.routers.phpma.middlewares=sslredirect
 
   cadvisor:
     image: google/cadvisor:latest
@@ -55,21 +56,16 @@ services:
       - /var/run:/var/run:rw
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - traefik_proxy
+      - default
     labels:
-      - "traefik.enable=true"
-      - "traefik.backend=cadvisor"
-      - "traefik.frontend.rule=Host:cadvisor.${DOMAINNAME}"  
-      - "traefik.port=8080"
-      - "traefik.docker.network=traefik_proxy"  
-      - "traefik.frontend.headers.SSLRedirect=true"
-      - "traefik.frontend.headers.STSSeconds=315360000"
-      - "traefik.frontend.headers.browserXSSFilter=true"
-      - "traefik.frontend.headers.contentTypeNosniff=true"
-      - "traefik.frontend.headers.forceSTSHeader=true"
-      - "traefik.frontend.headers.SSLHost=${DOMAINNAME}"
-      - "traefik.frontend.headers.STSIncludeSubdomains=true"
-      - "traefik.frontend.headers.STSPreload=true"
-      - "traefik.frontend.headers.frameDeny=true"
+      - traefik.enable=true
+      - traefik.http.routers.cadvisor.rule=Host(`cadvisor.${DOMAINNAME}`)
+      - traefik.http.routers.cadvisor.entrypoints=https
+      - traefik.http.routers.cadvisor.tls=true
+      - traefik.http.services.cadvisor.loadbalancer.server.port=8080
+      - traefik.docker.network=traefik_proxy
 
   flexget:
     image: wiserain/flexget
@@ -90,20 +86,12 @@ services:
       - traefik_proxy
       - default
     labels:
-      - "traefik.enable=true"
-      - "traefik.backend=flexget"
-      - "traefik.frontend.rule=Host:flexget.${DOMAINNAME}"  
-      - "traefik.port=5050"
-      - "traefik.docker.network=traefik_proxy"  
-      - "traefik.frontend.headers.SSLRedirect=true"
-      - "traefik.frontend.headers.STSSeconds=315360000"
-      - "traefik.frontend.headers.browserXSSFilter=true"
-      - "traefik.frontend.headers.contentTypeNosniff=true"
-      - "traefik.frontend.headers.forceSTSHeader=true"
-      - "traefik.frontend.headers.SSLHost=${DOMAINNAME}"
-      - "traefik.frontend.headers.STSIncludeSubdomains=true"
-      - "traefik.frontend.headers.STSPreload=true"
-      - "traefik.frontend.headers.frameDeny=true"
+      - traefik.enable=true
+      - traefik.http.routers.flexget.rule=Host(`flexget.${DOMAINNAME}`)
+      - traefik.http.routers.flexget.entrypoints=https
+      - traefik.http.routers.flexget.tls=true
+      - traefik.http.services.flexget.loadbalancer.server.port=5050
+      - traefik.docker.network=traefik_proxy
 
   transmission:
     image: linuxserver/transmission
@@ -125,20 +113,15 @@ services:
       - traefik_proxy
       - default
     labels:
-      - "traefik.enable=true"
-      - "traefik.backend=transmission"
-      - "traefik.frontend.rule=Host:transmission.${DOMAINNAME}"  
-      - "traefik.port=9091"
-      - "traefik.docker.network=traefik_proxy"
-      - "traefik.frontend.headers.SSLRedirect=true"
-      - "traefik.frontend.headers.STSSeconds=315360000"
-      - "traefik.frontend.headers.browserXSSFilter=true"
-      - "traefik.frontend.headers.contentTypeNosniff=true"
-      - "traefik.frontend.headers.forceSTSHeader=true"
-      - "traefik.frontend.headers.SSLHost=${DOMAINNAME}"
-      - "traefik.frontend.headers.STSIncludeSubdomains=true"
-      - "traefik.frontend.headers.STSPreload=true"
-      - "traefik.frontend.headers.frameDeny=true"  
+      - traefik.enable=true
+      - traefik.http.routers.transmission.rule=Host(`transmission.${DOMAINNAME}`)
+      - traefik.http.routers.transmission.entrypoints=https
+      - traefik.http.routers.transmission-secure.rule=Host(`transmission.${DOMAINNAME}`)
+      - traefik.http.routers.transmission-secure.entrypoints=https
+      - traefik.http.routers.transmission-secure.tls=true
+      - traefik.http.services.transmission.loadbalancer.server.port=9091
+      - traefik.docker.network=traefik_proxy
+      - traefik.http.routers.transmission.middlewares=sslredirect
 
   filebot-node:
     image: rednoah/filebot:node
@@ -157,21 +140,12 @@ services:
       - traefik_proxy
       - default
     labels:
-      - "traefik.enable=true"
-      - "traefik.backend=filebot-node"
-      - "traefik.frontend.rule=Host:filebot.${DOMAINNAME}"  
-      - "traefik.port=5452"
-      - "traefik.docker.network=traefik_proxy"
-      - "traefik.frontend.headers.SSLRedirect=true"
-      - "traefik.frontend.headers.STSSeconds=315360000"
-      - "traefik.frontend.headers.browserXSSFilter=true"
-      - "traefik.frontend.headers.contentTypeNosniff=true"
-      - "traefik.frontend.headers.forceSTSHeader=true"
-      - "traefik.frontend.headers.SSLHost=${DOMAINNAME}"
-      - "traefik.frontend.headers.STSIncludeSubdomains=true"
-      - "traefik.frontend.headers.STSPreload=true"
-      - "traefik.frontend.headers.frameDeny=true"
-      - "traefik.frontend.auth.basic.users=${HTTP_USERNAME}:${HTTP_PASSWORD}"
+      - traefik.enable=true
+      - traefik.http.routers.filebot.rule=Host(`filebot.${DOMAINNAME}`)
+      - traefik.http.routers.filebot.entrypoints=https
+      - traefik.http.routers.filebot.tls=true
+      - traefik.http.services.filebot.loadbalancer.server.port=5452
+      - traefik.docker.network=traefik_proxy
 
   portainer:
     image: portainer/portainer:1.21.0
@@ -187,20 +161,15 @@ services:
     networks:
       - traefik_proxy
     labels:
-      - "traefik.enable=true"
-      - "traefik.backend=portainer"
-      - "traefik.frontend.rule=Host:portainer.${DOMAINNAME}"  
-      - "traefik.port=9000"
-      - "traefik.docker.network=traefik_proxy"
-      - "traefik.frontend.headers.SSLRedirect=true"
-      - "traefik.frontend.headers.STSSeconds=315360000"
-      - "traefik.frontend.headers.browserXSSFilter=true"
-      - "traefik.frontend.headers.contentTypeNosniff=true"
-      - "traefik.frontend.headers.forceSTSHeader=true"
-      - "traefik.frontend.headers.SSLHost=example.com"
-      - "traefik.frontend.headers.STSIncludeSubdomains=true"
-      - "traefik.frontend.headers.STSPreload=true"
-      - "traefik.frontend.headers.frameDeny=true"
+      - traefik.enable=true
+      - traefik.http.routers.portainer.rule=Host(`portainer.${DOMAINNAME}`)
+      - traefik.http.routers.portainer.entrypoints=http
+      - traefik.http.routers.portainer-secure.rule=Host(`portainer.${DOMAINNAME}`)
+      - traefik.http.routers.portainer-secure.entrypoints=https
+      - traefik.http.routers.portainer-secure.tls=true
+      - traefik.http.services.portainer.loadbalancer.server.port=9000
+      - traefik.docker.network=traefik_proxy
+      - traefik.http.routers.portainer.middlewares=sslredirect
 
   watchtower:
     container_name: watchtower
@@ -253,17 +222,17 @@ services:
       - PGID=${PGID}
       - TZ=${TZ}
     labels:
-      - "traefik.enable=true"
-      - "traefik.tags=frontend"
-      - "traefik.frontend.passHostHeader=true"
-      - "traefik.admin.backend=unifi"
-      - "traefik.admin.frontend.rule=Host:unifi.${DOMAINNAME}"
-      - "traefik.admin.port=8443"
-      - "traefik.admin.protocol=https"
+      - traefik.enable=true
+      - traefik.http.routers.unifi.rule=Host(`unifi.${DOMAINNAME}`)
+      - traefik.http.routers.unifi.entrypoints=https
+      - traefik.http.routers.unifi.tls=true
+      - "traefik.docker.network=traefik_proxy"
+      - traefik.http.services.unifi.loadbalancer.server.port=8443
 
   traefik:
     hostname: traefik
-    image: traefik:v1.7.16-alpine
+    # image: traefik:v1.7.16-alpine
+    image: traefik:latest
     container_name: traefik
     restart: always
     domainname: ${DOMAINNAME}
@@ -281,21 +250,17 @@ services:
       - CF_API_EMAIL=${CLOUDFLARE_EMAIL}
       - CF_API_KEY=${CLOUDFLARE_API_KEY}
     labels:
-      - "traefik.enable=true"
-      - "traefik.backend=traefik"
-      - "traefik.frontend.rule=Host:traefik.${DOMAINNAME}"  
-      - "traefik.port=8080"
-      - "traefik.docker.network=traefik_proxy"
-      - "traefik.frontend.headers.SSLRedirect=true"
-      - "traefik.frontend.headers.STSSeconds=315360000"
-      - "traefik.frontend.headers.browserXSSFilter=true"
-      - "traefik.frontend.headers.contentTypeNosniff=true"
-      - "traefik.frontend.headers.forceSTSHeader=true"
-      - "traefik.frontend.headers.SSLHost=${DOMAINNAME}"
-      - "traefik.frontend.headers.STSIncludeSubdomains=true"
-      - "traefik.frontend.headers.STSPreload=true"
-      - "traefik.frontend.headers.frameDeny=true"
-      - "traefik.frontend.auth.basic.users=${HTTP_USERNAME}:${HTTP_PASSWORD}"
+      - traefik.enable=true
+      - traefik.http.routers.traefik.rule=Host(`traefik.${DOMAINNAME}`)
+      - traefik.http.routers.traefik.entrypoints=http
+      - traefik.http.routers.traefik-secure.rule=Host(`traefik.${DOMAINNAME}`)
+      - traefik.http.routers.traefik-secure.entrypoints=https
+      - traefik.http.routers.traefik-secure.tls=true
+      - traefik.http.routers.traefik-secure.middlewares=auth
+      - traefik.http.routers.traefik-secure.service=api@internal
+      - traefik.http.services.traefik.loadbalancer.server.port=8080
+      - "traefik.http.middlewares.sslredirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.auth.basicauth.users=${HTTP_USERNAME}:${HTTP_PASSWORD}"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ${USERDIR}/docker/traefik:/etc/traefik
@@ -321,13 +286,12 @@ services:
     networks:
       - traefik_proxy
     labels:
-      - "traefik.enable=true"
-      - "traefik.backend=emby"
-      - "traefik.frontend.rule=Host:media.${DOMAINNAME}"
-      - "traefik.port=8096"
-      - "traefik.protocol=http"
-      - "traefik.docker.network=traefik_proxy"
-      - "traefik.frontend.passHostHeader=true"
+      - traefik.enable=true
+      - traefik.http.routers.emby.rule=Host(`media.${DOMAINNAME}`)
+      - traefik.http.routers.emby.entrypoints=https
+      - traefik.http.routers.emby.tls=true
+      - traefik.http.services.emby.loadbalancer.server.port=8096
+      - traefik.docker.network=traefik_proxy
 
   mariadb:
     image: linuxserver/mariadb
@@ -357,14 +321,14 @@ services:
       - traefik_proxy
       - default
     labels:
-      - "traefik.enable=true"
-      - "traefik.backend=nginx-frank"
-      - "traefik.frontend.rule=Host:${DOMAINNAME}"
-      - "traefik.frontend.entryPoints=http,https"
-      - "traefik.frontend.headers.SSLRedirect=true"
-      - "traefik.docker.network=traefik_proxy"
-      - "traefik.frontend.passHostHeader=true"
-      - "traefik.port=80"
+      - traefik.enable=true
+      - traefik.http.routers.frank.rule=Host(`${DOMAINNAME}`)
+      - traefik.http.routers.frank.entrypoints=http
+      - traefik.http.routers.frank-secure.rule=Host(`${DOMAINNAME}`)
+      - traefik.http.routers.frank-secure.entrypoints=https
+      - traefik.http.routers.frank-secure.tls=true
+      - traefik.docker.network=traefik_proxy
+      - traefik.http.routers.frank.middlewares=sslredirect
 
   nginx-thcuk:
     image: linuxserver/nginx
@@ -380,14 +344,14 @@ services:
       - traefik_proxy
       - default
     labels:
-      - "traefik.enable=true"
-      - "traefik.backend=nginx-thcuk"
-      - "traefik.frontend.rule=Host:${THCDOMAINNAME}"
-      - "traefik.frontend.entryPoints=http,https"
-      - "traefik.frontend.headers.SSLRedirect=true"
-      - "traefik.docker.network=traefik_proxy"
-      - "traefik.frontend.passHostHeader=true"
-      - "traefik.port=80"
+      - traefik.enable=true
+      - traefik.http.routers.thcuk.rule=Host(`${THCDOMAINNAME}`)
+      - traefik.http.routers.thcuk.entrypoints=http
+      - traefik.http.routers.thcuk-secure.rule=Host(`${THCDOMAINNAME}`)
+      - traefik.http.routers.thcuk-secure.entrypoints=https
+      - traefik.http.routers.thcuk-secure.tls=true
+      - traefik.docker.network=traefik_proxy
+      - traefik.http.routers.thcuk.middlewares=sslredirect
 
   nginx-ls-dev:
     image: linuxserver/nginx
@@ -403,14 +367,14 @@ services:
       - traefik_proxy
       - default
     labels:
-      - "traefik.enable=true"
-      - "traefik.backend=nginx-ls-dev"
-      - "traefik.frontend.rule=Host:dev.${LSDOMAINNAME}"
-      - "traefik.frontend.entryPoints=http,https"
-      - "traefik.frontend.headers.SSLRedirect=true"
-      - "traefik.docker.network=traefik_proxy"
-      - "traefik.frontend.passHostHeader=true"
-      - "traefik.port=80"
+      - traefik.enable=true
+      - traefik.http.routers.ls-dev.rule=Host(`dev.${LSDOMAINNAME}`)
+      - traefik.http.routers.ls-dev.entrypoints=http
+      - traefik.http.routers.ls-dev-secure.rule=Host(`dev.${LSDOMAINNAME}`)
+      - traefik.http.routers.ls-dev-secure.entrypoints=https
+      - traefik.http.routers.ls-dev-secure.tls=true
+      - traefik.docker.network=traefik_proxy
+      - traefik.http.routers.ls-dev.middlewares=sslredirect
 
   nginx-ls-temp:
     image: linuxserver/nginx
@@ -426,14 +390,14 @@ services:
       - traefik_proxy
       - default
     labels:
-      - "traefik.enable=true"
-      - "traefik.backend=nginx-ls-temp"
-      - "traefik.frontend.rule=Host:${LSDOMAINNAME}"
-      - "traefik.frontend.entryPoints=http,https"
-      - "traefik.frontend.headers.SSLRedirect=true"
-      - "traefik.docker.network=traefik_proxy"
-      - "traefik.frontend.passHostHeader=true"
-      - "traefik.port=80"
+      - traefik.enable=true
+      - traefik.http.routers.ls-temp.rule=Host(`${LSDOMAINNAME}`)
+      - traefik.http.routers.ls-temp.entrypoints=http
+      - traefik.http.routers.ls-temp-secure.rule=Host(`${LSDOMAINNAME}`)
+      - traefik.http.routers.ls-temp-secure.entrypoints=https
+      - traefik.http.routers.ls-temp-secure.tls=true
+      - traefik.docker.network=traefik_proxy
+      - traefik.http.routers.ls-temp.middlewares=sslredirect
 
   deluge:
     image: linuxserver/deluge:5b398f77-ls22
@@ -453,20 +417,12 @@ services:
       - traefik_proxy
       - default
     labels:
-      - "traefik.backend=deluge"
-      - "traefik.frontend.rule=Host:deluge.${DOMAINNAME}"
-      - "traefik.docker.network=traefik_proxy"
-      - "traefik.port=8112"
-      - "traefik.enable=true"
-      - "traefik.frontend.headers.SSLRedirect=true"
-      - "traefik.frontend.headers.STSSeconds=315360000"
-      - "traefik.frontend.headers.browserXSSFilter=true"
-      - "traefik.frontend.headers.contentTypeNosniff=true"
-      - "traefik.frontend.headers.forceSTSHeader=true"
-      - "traefik.frontend.headers.SSLHost=${DOMAINNAME}"
-      - "traefik.frontend.headers.STSIncludeSubdomains=true"
-      - "traefik.frontend.headers.STSPreload=true"
-      - "traefik.frontend.headers.frameDeny=true"
+      - traefik.enable=true
+      - traefik.http.routers.deluge.rule=Host(`deluge.${DOMAINNAME}`)
+      - traefik.http.routers.deluge.entrypoints=https
+      - traefik.http.routers.deluge.tls=true
+      - traefik.http.services.deluge.loadbalancer.server.port=8112
+      - traefik.docker.network=traefik_proxy
 
 networks:
   traefik_proxy:
