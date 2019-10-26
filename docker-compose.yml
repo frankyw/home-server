@@ -76,7 +76,7 @@ services:
       - default
     labels:
       - traefik.enable=true
-      - traefik.http.routers.adguardrule=Host(`adguard.${DOMAINNAME}`)
+      - traefik.http.routers.adguard.rule=Host(`adguard.${DOMAINNAME}`)
       - traefik.http.routers.adguard.entrypoints=https
       - traefik.http.routers.adguard.tls=true
       - traefik.http.services.adguard.loadbalancer.server.port=80
