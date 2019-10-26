@@ -1,6 +1,6 @@
 # frankyw/home-server
 
-This is a repository to verion control and document my journey from one Ubuntu server with a multitude of apps running on it, to complete docker containerization.
+This is a repository to version control and document my journey from one Ubuntu server with a multitude of apps running on it, to complete docker containerization.
 
 ## Apps
 
