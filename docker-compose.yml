@@ -198,7 +198,7 @@ services:
       - traefik.docker.network=traefik_proxy
 
   portainer:
-    image: portainer/portainer:1.21.0
+    image: portainer/portainer:latest
     container_name: portainer
     restart: always
     command: -H unix:///var/run/docker.sock
@@ -221,11 +221,10 @@ services:
   watchtower:
     container_name: watchtower
     restart: always
-    image: v2tec/watchtower
+    image: containrrr/watchtower
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    command: --schedule "0 0 4 * * *" --cleanup
-
+      
   unifi-controller:
     image: linuxserver/unifi-controller
     container_name: unifi-controller
