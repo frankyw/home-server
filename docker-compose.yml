@@ -29,11 +29,10 @@ services:
       - traefik.http.routers.traefik.service=api@internal
       - traefik.http.services.traefik.loadbalancer.server.port=8080
       - traefik.http.middlewares.auth.basicauth.users=${HTTP_USERNAME}:${HTTP_PASSWORD}
-      - "traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)"
-      - "traefik.http.routers.http-catchall.entrypoints=http"
-      - "traefik.http.routers.http-catchall.middlewares=sslredirect"
       - traefik.http.middlewares.sslredirect.redirectscheme.scheme=https
-
+      - traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)
+      - traefik.http.routers.http-catchall.entrypoints=http
+      - traefik.http.routers.http-catchall.middlewares=sslredirect
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ${USERDIR}/docker/traefik:/etc/traefik
@@ -54,6 +53,7 @@ services:
       - traefik_proxy
       - default
     labels:
+      - traefik.enable=true
       - traefik.http.routers.duplicati.rule=Host(`duplicati.${DOMAINNAME}`)
       - traefik.http.routers.duplicati.entrypoints=https
       - traefik.http.routers.duplicati.tls=true
