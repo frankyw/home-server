@@ -24,11 +24,16 @@ services:
       - traefik.http.routers.traefik.rule=Host(`traefik.${DOMAINNAME}`)
       - traefik.http.routers.traefik.entrypoints=https
       - traefik.http.routers.traefik.tls=true
-      - traefik.http.routers.traefik.middlewares=auth
+      - traefik.http.routers.traefik.tls.options=default
+      - traefik.http.routers.traefik.middlewares=auth,securityheaders
       - traefik.http.routers.traefik.service=api@internal
       - traefik.http.services.traefik.loadbalancer.server.port=8080
       - traefik.http.middlewares.auth.basicauth.users=${HTTP_USERNAME}:${HTTP_PASSWORD}
       - traefik.http.middlewares.sslredirect.redirectscheme.scheme=https
+      - traefik.http.middlewares.securityheaders.headers.forceSTSHeader=true
+      - traefik.http.middlewares.securityheaders.headers.stsPreload=true
+      - traefik.http.middlewares.securityheaders.headers.stsSeconds=315360000
+      - traefik.http.middlewares.securityheaders.headers.stsIncludeSubdomains=true
       - traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)
       - traefik.http.routers.http-catchall.entrypoints=http
       - traefik.http.routers.http-catchall.middlewares=sslredirect
@@ -299,7 +304,9 @@ services:
       - traefik.http.routers.emby.rule=Host(`media.${DOMAINNAME}`)
       - traefik.http.routers.emby.entrypoints=https
       - traefik.http.routers.emby.tls=true
+      - traefik.http.routers.emby.tls.options=default
       - traefik.http.services.emby.loadbalancer.server.port=8096
+      - traefik.http.routers.emby.middlewares=securityheaders
       - traefik.docker.network=traefik_proxy
 
   mariadb:
@@ -336,15 +343,35 @@ services:
       - traefik.http.routers.frank.tls=true
       - traefik.docker.network=traefik_proxy
 
-  nginx-thcuk:
+  nginx-fmw:
     image: linuxserver/nginx
-    container_name: nginx-thcuk
+    container_name: nginx-fmw
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
     volumes:
-      - ${USERDIR}/docker/nginx/thc:/config
+      - ${USERDIR}/docker/nginx/fmw:/config
+    restart: unless-stopped
+    networks:
+      - traefik_proxy
+      - default
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.fmw.rule=Host(`${FMWDOMAINNAME}`)
+      - traefik.http.routers.fmw.entrypoints=https
+      - traefik.http.routers.fmw.tls=true
+      - traefik.docker.network=traefik_proxy
+
+  nginx-thcuk:
+    image: linuxserver/nginx
+    container_name: nginx-thcuk
+    environment:
+      - PUID=1001
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - /home/thc:/config
     restart: unless-stopped
     networks:
       - traefik_proxy
