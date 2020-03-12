@@ -19,11 +19,23 @@ services:
       - TZ=${TZ}
       - CF_API_EMAIL=${CLOUDFLARE_EMAIL}
       - CF_API_KEY=${CLOUDFLARE_API_KEY}
+    command:
+      - '--log.level=DEBUG'
+      - '--entrypoints.http.address=:80'
+      - '--entrypoints.https.address=:443'
+      - '--providers.docker'
+      - '--api'
+      - '--certificatesresolvers.cloudflare.acme.email=frank@frankw.net'
+      - '--certificatesresolvers.cloudflare.acme.dnschallenge=true'
+      - '--certificatesresolvers.cloudflare.acme.dnschallenge.provider=cloudflare'
+      - '--certificatesResolvers.cloudflare.acme.dnsChallenge.resolvers=1.1.1.1:53,1.0.0.1:53'
+      - '--certificatesresolvers.cloudflare.acme.storage=/acme.json'
     labels:
       - traefik.enable=true
       - traefik.http.routers.traefik.rule=Host(`traefik.${DOMAINNAME}`)
       - traefik.http.routers.traefik.entrypoints=https
       - traefik.http.routers.traefik.tls=true
+      - traefik.http.routers.traefik.tls.certresolver=default
       - traefik.http.routers.traefik.tls.options=default
       - traefik.http.routers.traefik.middlewares=auth,securityheaders
       - traefik.http.routers.traefik.service=api@internal
@@ -304,8 +316,8 @@ services:
       - traefik.http.routers.emby.rule=Host(`media.${DOMAINNAME}`)
       - traefik.http.routers.emby.entrypoints=https
       - traefik.http.routers.emby.tls=true
-      - traefik.http.routers.emby.tls.options=default
       - traefik.http.services.emby.loadbalancer.server.port=8096
+      - traefik.http.routers.emby.tls.options=default
       - traefik.http.routers.emby.middlewares=securityheaders
       - traefik.docker.network=traefik_proxy
 
@@ -361,6 +373,9 @@ services:
       - traefik.http.routers.fmw.rule=Host(`${FMWDOMAINNAME}`)
       - traefik.http.routers.fmw.entrypoints=https
       - traefik.http.routers.fmw.tls=true
+      - traefik.http.routers.fmw.tls.options=default
+      - traefik.http.routers.fmw.tls.certresolver=default
+      - traefik.http.routers.fmw.middlewares=securityheaders
       - traefik.docker.network=traefik_proxy
 
   nginx-thcuk:
@@ -381,26 +396,9 @@ services:
       - traefik.http.routers.thcuk.rule=Host(`${THCDOMAINNAME}`)
       - traefik.http.routers.thcuk.entrypoints=https
       - traefik.http.routers.thcuk.tls=true
-      - traefik.docker.network=traefik_proxy
-
-  nginx-ls-dev:
-    image: linuxserver/nginx
-    container_name: nginx-ls-dev
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-    volumes:
-      - ${USERDIR}/docker/nginx/ls:/config
-    restart: unless-stopped
-    networks:
-      - traefik_proxy
-      - default
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.ls-dev.rule=Host(`dev.${LSDOMAINNAME}`)
-      - traefik.http.routers.ls-dev.entrypoints=https
-      - traefik.http.routers.ls-dev.tls=true
+      - traefik.http.routers.thcuk.tls.options=default
+      - traefik.http.routers.thcuk.tls.certresolver=default
+      - traefik.http.routers.thcuk.middlewares=securityheaders
       - traefik.docker.network=traefik_proxy
 
   nginx-ls-temp:
@@ -421,6 +419,9 @@ services:
       - traefik.http.routers.ls-temp.rule=Host(`${LSDOMAINNAME}`)
       - traefik.http.routers.ls-temp.entrypoints=https
       - traefik.http.routers.ls-temp.tls=true
+      - traefik.http.routers.ls-temp.tls.options=default
+      - traefik.http.routers.ls-temp.tls.certresolver=default
+      - traefik.http.routers.ls-temp.middlewares=securityheaders
       - traefik.docker.network=traefik_proxy
 
   deluge:
