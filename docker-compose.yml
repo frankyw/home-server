@@ -416,7 +416,7 @@ services:
       - default
     labels:
       - traefik.enable=true
-      - traefik.http.routers.ls-temp.rule=Host(`${LSDOMAINNAME}`)
+      - traefik.http.routers.ls-temp.rule=Host(`${LSDOMAINNAME}`, `${LSDOMAIN_TR}`, `${LSDOMAIN_SR}`)
       - traefik.http.routers.ls-temp.entrypoints=https
       - traefik.http.routers.ls-temp.tls=true
       - traefik.http.routers.ls-temp.tls.options=default
