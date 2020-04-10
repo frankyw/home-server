@@ -25,7 +25,7 @@ services:
       - '--entrypoints.https.address=:443'
       - '--providers.docker'
       - '--api'
-      - '--certificatesresolvers.cloudflare.acme.email=frank@frankw.net'
+      - '--certificatesresolvers.cloudflare.acme.email=${FW_EMAIL}'
       - '--certificatesresolvers.cloudflare.acme.dnschallenge=true'
       - '--certificatesresolvers.cloudflare.acme.dnschallenge.provider=cloudflare'
       - '--certificatesResolvers.cloudflare.acme.dnsChallenge.resolvers=1.1.1.1:53,1.0.0.1:53'
