@@ -20,25 +20,30 @@ services:
       - CF_API_EMAIL=${CLOUDFLARE_EMAIL}
       - CF_API_KEY=${CLOUDFLARE_API_KEY}
     command:
-      - '--log.level=DEBUG'
-      - '--entrypoints.http.address=:80'
-      - '--entrypoints.https.address=:443'
-      - '--providers.docker'
-      - '--api'
-      - '--certificatesresolvers.cloudflare.acme.email=${FW_EMAIL}'
-      - '--certificatesresolvers.cloudflare.acme.dnschallenge=true'
-      - '--certificatesresolvers.cloudflare.acme.dnschallenge.provider=cloudflare'
-      - '--certificatesResolvers.cloudflare.acme.dnsChallenge.resolvers=1.1.1.1:53,1.0.0.1:53'
-      - '--certificatesresolvers.cloudflare.acme.storage=/acme.json'
+      - --log.level=INFO
+      - --entrypoints.http.address=:80
+      - --entrypoints.https.address=:443
+      - --providers.docker
+      - --providers.file.directory=/rules
+      - --providers.docker.exposedbydefault=false
+      - --global.sendAnonymousUsage=true
+      - --api
+      - --certificatesresolvers.cloudflare.acme.email=${FW_EMAIL}
+      - --certificatesresolvers.cloudflare.acme.dnschallenge=true
+      - --certificatesresolvers.cloudflare.acme.dnschallenge.provider=cloudflare
+      - --certificatesResolvers.cloudflare.acme.dnsChallenge.resolvers=1.1.1.1:53,1.0.0.1:53
+      - --certificatesresolvers.cloudflare.acme.storage=/acme.json
     labels:
       - traefik.enable=true
       - traefik.http.routers.traefik.rule=Host(`traefik.${DOMAINNAME}`)
       - traefik.http.routers.traefik.entrypoints=https
       - traefik.http.routers.traefik.tls=true
-      - traefik.http.routers.traefik.tls.certresolver=default
+      - traefik.http.routers.traefik.tls.certresolver=cloudflare
       - traefik.http.routers.traefik.tls.options=default
       - traefik.http.routers.traefik.middlewares=auth,securityheaders
       - traefik.http.routers.traefik.service=api@internal
+      - traefik.http.routers.traefik.tls.domains[0].main=${DOMAINNAME}
+      - traefik.http.routers.traefik.tls.domains[0].sans=*.${DOMAINNAME}
       - traefik.http.services.traefik.loadbalancer.server.port=8080
       - traefik.http.middlewares.auth.basicauth.users=${HTTP_USERNAME}:${HTTP_PASSWORD}
       - traefik.http.middlewares.sslredirect.redirectscheme.scheme=https
@@ -49,10 +54,13 @@ services:
       - traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)
       - traefik.http.routers.http-catchall.entrypoints=http
       - traefik.http.routers.http-catchall.middlewares=sslredirect
+
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ${USERDIR}/docker/traefik:/etc/traefik
+      #- ${USERDIR}/docker/traefik:/etc/traefik
       - ${USERDIR}/docker/shared:/shared
+      - $USERDIR/docker/traefik/acme/acme.json:/acme.json
+      - $USERDIR/docker/traefik/rules:/rules 
 
   duplicati:
     image: linuxserver/duplicati
@@ -374,7 +382,7 @@ services:
       - traefik.http.routers.fmw.entrypoints=https
       - traefik.http.routers.fmw.tls=true
       - traefik.http.routers.fmw.tls.options=default
-      - traefik.http.routers.fmw.tls.certresolver=default
+      - traefik.http.routers.fmw.tls.certresolver=cloudflare
       - traefik.http.routers.fmw.middlewares=securityheaders
       - traefik.docker.network=traefik_proxy
 
@@ -397,7 +405,7 @@ services:
       - traefik.http.routers.thcuk.entrypoints=https
       - traefik.http.routers.thcuk.tls=true
       - traefik.http.routers.thcuk.tls.options=default
-      - traefik.http.routers.thcuk.tls.certresolver=default
+      - traefik.http.routers.thcuk.tls.certresolver=cloudflare
       - traefik.http.routers.thcuk.middlewares=securityheaders
       - traefik.docker.network=traefik_proxy
 
@@ -420,7 +428,7 @@ services:
       - traefik.http.routers.ls-temp.entrypoints=https
       - traefik.http.routers.ls-temp.tls=true
       - traefik.http.routers.ls-temp.tls.options=default
-      - traefik.http.routers.ls-temp.tls.certresolver=default
+      - traefik.http.routers.ls-temp.tls.certresolver=cloudflare
       - traefik.http.routers.ls-temp.middlewares=securityheaders
       - traefik.docker.network=traefik_proxy
 
