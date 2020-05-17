@@ -54,10 +54,8 @@ services:
       - traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)
       - traefik.http.routers.http-catchall.entrypoints=http
       - traefik.http.routers.http-catchall.middlewares=sslredirect
-
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      #- ${USERDIR}/docker/traefik:/etc/traefik
       - ${USERDIR}/docker/shared:/shared
       - $USERDIR/docker/traefik/acme/acme.json:/acme.json
       - $USERDIR/docker/traefik/rules:/rules 
@@ -126,7 +124,7 @@ services:
       - traefik.docker.network=traefik_proxy
       
   cadvisor:
-    image: google/cadvisor:latest
+    image: gcr.io/google-containers/cadvisor
     container_name: cadvisor
     restart: always
     volumes:
