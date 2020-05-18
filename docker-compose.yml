@@ -11,8 +11,8 @@ services:
       - default
       - traefik_proxy
     ports:
-      - "80:80"
-      - "443:443"
+      - 80:80
+      - 443:443
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -79,7 +79,8 @@ services:
       - traefik.http.routers.duplicati.rule=Host(`duplicati.${DOMAINNAME}`)
       - traefik.http.routers.duplicati.entrypoints=https
       - traefik.http.routers.duplicati.tls=true
-      - traefik.http.routers.duplicati.middlewares=auth
+      - traefik.http.routers.duplicati.tls.options=default
+      - traefik.http.routers.duplicati.middlewares=auth,securityheaders
       - traefik.http.services.duplicati.loadbalancer.server.port=8200
       - traefik.docker.network=traefik_proxy
 
@@ -101,6 +102,8 @@ services:
       - traefik.http.routers.adguard.rule=Host(`adguard.${DOMAINNAME}`)
       - traefik.http.routers.adguard.entrypoints=https
       - traefik.http.routers.adguard.tls=true
+      - traefik.http.routers.adguard.tls.options=default
+      - traefik.http.routers.adguard.middlewares=securityheaders
       - traefik.http.services.adguard.loadbalancer.server.port=80
       - traefik.docker.network=traefik_proxy
 
@@ -120,6 +123,8 @@ services:
       - traefik.http.routers.phpma.rule=Host(`phpma.${DOMAINNAME}`)
       - traefik.http.routers.phpma.entrypoints=https
       - traefik.http.routers.phpma.tls=true
+      - traefik.http.routers.phpma.tls.options=default
+      - traefik.http.routers.phpma.middlewares=securityheaders
       - traefik.http.services.phpma.loadbalancer.server.port=80
       - traefik.docker.network=traefik_proxy
       
@@ -129,9 +134,10 @@ services:
     restart: always
     volumes:
       - /:/rootfs:ro
-      - /var/run:/var/run:rw
+      - /var/run:/var/run:ro
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
     networks:
       - traefik_proxy
       - default
@@ -140,7 +146,8 @@ services:
       - traefik.http.routers.cadvisor.rule=Host(`cadvisor.${DOMAINNAME}`)
       - traefik.http.routers.cadvisor.entrypoints=https
       - traefik.http.routers.cadvisor.tls=true
-      - traefik.http.routers.cadvisor.middlewares=auth
+      - traefik.http.routers.cadvisor.tls.options=default
+      - traefik.http.routers.cadvisor.middlewares=auth,securityheaders
       - traefik.http.services.cadvisor.loadbalancer.server.port=8080
       - traefik.docker.network=traefik_proxy
 
@@ -165,6 +172,8 @@ services:
       - traefik.http.routers.flexget.rule=Host(`flexget.${DOMAINNAME}`)
       - traefik.http.routers.flexget.entrypoints=https
       - traefik.http.routers.flexget.tls=true
+      - traefik.http.routers.flexget.tls.options=default
+      - traefik.http.routers.flexget.middlewares=securityheaders
       - traefik.http.services.flexget.loadbalancer.server.port=5050
       - traefik.docker.network=traefik_proxy
       
@@ -192,6 +201,8 @@ services:
       - traefik.http.routers.transmission.rule=Host(`transmission.${DOMAINNAME}`)
       - traefik.http.routers.transmission.entrypoints=https
       - traefik.http.routers.transmission.tls=true
+      - traefik.http.routers.transmission.tls.options=default
+      - traefik.http.routers.transmission.middlewares=securityheaders
       - traefik.http.services.transmission.loadbalancer.server.port=9091
       - traefik.docker.network=traefik_proxy
 
@@ -215,7 +226,8 @@ services:
       - traefik.http.routers.filebot.rule=Host(`filebot.${DOMAINNAME}`)
       - traefik.http.routers.filebot.entrypoints=https
       - traefik.http.routers.filebot.tls=true
-      - traefik.http.routers.filebot.middlewares=auth
+      - traefik.http.routers.filebot.tls.options=default
+      - traefik.http.routers.filebot.middlewares=auth,securityheaders
       - traefik.http.services.filebot.loadbalancer.server.port=5452
       - traefik.docker.network=traefik_proxy
 
@@ -237,6 +249,8 @@ services:
       - traefik.http.routers.portainer.rule=Host(`portainer.${DOMAINNAME}`)
       - traefik.http.routers.portainer.entrypoints=https
       - traefik.http.routers.portainer.tls=true
+      - traefik.http.routers.portainer.tls.options=default
+      - traefik.http.routers.portainer.middlewares=securityheaders
       - traefik.http.services.portainer.loadbalancer.server.port=9000
       - traefik.docker.network=traefik_proxy
 
@@ -295,8 +309,10 @@ services:
       - traefik.http.routers.unifi.rule=Host(`unifi.${DOMAINNAME}`)
       - traefik.http.routers.unifi.entrypoints=https
       - traefik.http.routers.unifi.tls=true
-      - "traefik.docker.network=traefik_proxy"
+      - traefik.http.routers.unifi.tls.options=default
+      - traefik.http.routers.unifi.middlewares=securityheaders
       - traefik.http.services.unifi.loadbalancer.server.port=8443
+      - traefik.docker.network=traefik_proxy
 
   emby:
     container_name: emby
@@ -307,14 +323,14 @@ services:
       - /storage:/storage
       - ${USERDIR}/docker/shared:/shared
     ports:
-      - "8096:8096/tcp"
+      - 8096:8096/tcp
     environment:
       - UID=${PUID}
       - GID=${PGID}
       - TZ=${TZ}
       - GIDLIST=${PGID},44
     devices:
-      - "/dev/dri/renderD128:/dev/dri/renderD128" 
+      - /dev/dri/renderD128:/dev/dri/renderD128
     networks:
       - traefik_proxy
     labels:
@@ -322,9 +338,9 @@ services:
       - traefik.http.routers.emby.rule=Host(`media.${DOMAINNAME}`)
       - traefik.http.routers.emby.entrypoints=https
       - traefik.http.routers.emby.tls=true
-      - traefik.http.services.emby.loadbalancer.server.port=8096
       - traefik.http.routers.emby.tls.options=default
       - traefik.http.routers.emby.middlewares=securityheaders
+      - traefik.http.services.emby.loadbalancer.server.port=8096
       - traefik.docker.network=traefik_proxy
 
   mariadb:
@@ -359,6 +375,8 @@ services:
       - traefik.http.routers.frank.rule=Host(`${DOMAINNAME}`)
       - traefik.http.routers.frank.entrypoints=https
       - traefik.http.routers.frank.tls=true
+      - traefik.http.routers.frank.tls.options=default
+      - traefik.http.routers.frank.middlewares=securityheaders
       - traefik.docker.network=traefik_proxy
 
   nginx-fmw:
@@ -452,6 +470,8 @@ services:
       - traefik.http.routers.deluge.rule=Host(`deluge.${DOMAINNAME}`)
       - traefik.http.routers.deluge.entrypoints=https
       - traefik.http.routers.deluge.tls=true
+      - traefik.http.routers.deluge.tls.options=default
+      - traefik.http.routers.deluge.middlewares=securityheaders
       - traefik.http.services.deluge.loadbalancer.server.port=8112
       - traefik.docker.network=traefik_proxy
 

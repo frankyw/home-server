@@ -1,6 +1,6 @@
 # frankyw/home-server
 
-This is a repository to version control and document my journey from one Ubuntu server with a multitude of apps running on it, to complete docker containerization. Base system is Ubuntu 20. To create this config, I referenced the [Smart Home Beginner](https://www.smarthomebeginner.com/category/home-server/) a lot.
+This is a repository to version control and document my journey from one Ubuntu server with a multitude of apps running on it, to complete Docker containerization. Base system is Ubuntu 20. To create this config, I referenced [Smart Home Beginner](https://www.smarthomebeginner.com/category/home-server/) quite a bit.
 
 ## Docker Containers
 
@@ -13,7 +13,7 @@ The following containers are being run:
 * [linuxserver/unifi-controller](https://hub.docker.com/r/linuxserver/unifi-controller) - Latest stable of Ubiquiti controller.
 * [rednoah/filebot:node](https://hub.docker.com/r/rednoah/filebot/) - Official Filebot container, used for automated media management.
 * [mariadb:latest](https://hub.docker.com/_/mariadb) - Official MariaDB image for nginx backends.
-* [traefik:latest](https://hub.docker.com/_/traefik) - Official Traefik container, exposes services over TLS.
+* [traefik:latest](https://hub.docker.com/_/traefik) - Official Traefik container, reverse proxy to expose services over TLS using Let's Encrypt in a far simpler way than nginx. 
 * [portainer/portainer](https://hub.docker.com/r/portainer/portainer) - Official Portainer image, docker cluster management.
 * [emby/embyserver:beta](https://hub.docker.com/r/emby/embyserver) - Official Emby beta container.
 * [adguard/adguardhome](https://hub.docker.com/r/adguard/adguardhome) - Official AdGuard Home container, DNS blackhole for all that spam.
