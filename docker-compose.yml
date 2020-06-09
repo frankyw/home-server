@@ -8,7 +8,7 @@ services:
     restart: always
     domainname: ${DOMAINNAME}
     networks:
-      - default
+      - internal
       - traefik_proxy
     ports:
       - 80:80
@@ -74,7 +74,7 @@ services:
       - ${USERDIR}:/source
     networks:
       - traefik_proxy
-      - default
+      - internal
     labels:
       - traefik.enable=true
       - traefik.http.routers.duplicati.rule=Host(`duplicati.${DOMAINNAME}`)
@@ -97,7 +97,7 @@ services:
       - "53:53/udp"
     networks:
       - traefik_proxy
-      - default
+      - internal
     labels:
       - traefik.enable=true
       - traefik.http.routers.adguard.rule=Host(`adguard.${DOMAINNAME}`)
@@ -118,7 +118,7 @@ services:
       - mariadb
     networks:
       - traefik_proxy
-      - default
+      - internal
     labels:
       - traefik.enable=true
       - traefik.http.routers.phpma.rule=Host(`phpma.${DOMAINNAME}`)
@@ -141,7 +141,7 @@ services:
       - /dev/disk/:/dev/disk:ro
     networks:
       - traefik_proxy
-      - default
+      - internal
     labels:
       - traefik.enable=true
       - traefik.http.routers.cadvisor.rule=Host(`cadvisor.${DOMAINNAME}`)
@@ -161,13 +161,13 @@ services:
       - PGID=${PGID}
       - TZ=${TZ}
       - FG_WEBUI_PASSWD=${FLEXGET_PASSWORD}
-      - FG_LOG_LEVEL=info
+      - FG_LOG_LEVEL=INFO
     volumes:
       - ${USERDIR}/docker/flexget:/config
       - /storage:/storage
     networks:
       - traefik_proxy
-      - default
+      - internal
     labels:
       - traefik.enable=true
       - traefik.http.routers.flexget.rule=Host(`flexget.${DOMAINNAME}`)
@@ -196,7 +196,7 @@ services:
     restart: unless-stopped
     networks:
       - traefik_proxy
-      - default
+      - internal
     labels:
       - traefik.enable=true
       - traefik.http.routers.transmission.rule=Host(`transmission.${DOMAINNAME}`)
@@ -221,7 +221,7 @@ services:
       - TZ=${TZ}
     networks:
       - traefik_proxy
-      - default
+      - internal
     labels:
       - traefik.enable=true
       - traefik.http.routers.filebot.rule=Host(`filebot.${DOMAINNAME}`)
@@ -262,6 +262,8 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     command: --cleanup
+    networks:
+      - internal
       
   unifi-controller:
     image: linuxserver/unifi-controller
@@ -336,7 +338,7 @@ services:
     volumes:
       - ${USERDIR}/docker/mariadb:/config
     networks:
-      - default
+      - internal
 
   nginx-frank:
     image: linuxserver/nginx
@@ -350,7 +352,7 @@ services:
     restart: unless-stopped
     networks:
       - traefik_proxy
-      - default
+      - internal
     labels:
       - traefik.enable=true
       - traefik.http.routers.frank.rule=Host(`${DOMAINNAME}`)
@@ -372,7 +374,7 @@ services:
     restart: unless-stopped
     networks:
       - traefik_proxy
-      - default
+      - internal
     labels:
       - traefik.enable=true
       - traefik.http.routers.fmw.rule=Host(`${FMWDOMAINNAME}`)
@@ -380,6 +382,8 @@ services:
       - traefik.http.routers.fmw.tls=true
       - traefik.http.routers.fmw.tls.options=default
       - traefik.http.routers.fmw.tls.certresolver=cloudflare
+      - traefik.http.routers.fmw.tls.domains[0].main=${FMWDOMAINNAME}
+      - traefik.http.routers.fmw.tls.domains[0].sans=*.${FMWDOMAINNAME}
       - traefik.http.routers.fmw.middlewares=securityheaders
       - traefik.docker.network=traefik_proxy
 
@@ -395,7 +399,7 @@ services:
     restart: unless-stopped
     networks:
       - traefik_proxy
-      - default
+      - internal
     labels:
       - traefik.enable=true
       - traefik.http.routers.thcuk.rule=Host(`${THCDOMAINNAME}`)
@@ -418,7 +422,7 @@ services:
     restart: unless-stopped
     networks:
       - traefik_proxy
-      - default
+      - internal
     labels:
       - traefik.enable=true
       - traefik.http.routers.ls-temp.rule=Host(`${LSDOMAINNAME}`, `${LSDOMAIN_TR}`, `${LSDOMAIN_SR}`)
@@ -445,7 +449,7 @@ services:
       - "54700:54700/udp"
     networks:
       - traefik_proxy
-      - default
+      - internal
     labels:
       - traefik.enable=true
       - traefik.http.routers.deluge.rule=Host(`deluge.${DOMAINNAME}`)
@@ -460,5 +464,6 @@ networks:
   traefik_proxy:
     external:
       name: traefik_proxy
-  default:
-    driver: bridge
+  internal:
+    external:
+      name: internal
