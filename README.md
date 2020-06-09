@@ -20,3 +20,7 @@ The following containers are being run:
 * [phpmyadmin/phpmyadmin](https://hub.docker.com/r/phpmyadmin/phpmyadmin) - Offical phpMyAdmin image for DB fiddling.
 * [containrrr/watchtower](https://hub.docker.com/r/containrrr/watchtower) - Official Watchtower image to update all containers.
 * [google-containers/cadvisor](https://gcr.io/google-containers/cadvisor) - Collecting some stats (which I may never use!)
+
+## Configuration
+
+I am using a Docker .env file, which contains all the variables found in the docker-compose.yml
