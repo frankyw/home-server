@@ -179,7 +179,7 @@ services:
       - traefik.docker.network=traefik_proxy
       
   transmission:
-    image: linuxserver/transmission
+    image: linuxserver/transmission:2.94-r3-ls53
     container_name: transmission
     environment:
       - PUID=${PUID}
