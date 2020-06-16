@@ -410,29 +410,6 @@ services:
       - traefik.http.routers.thcuk.middlewares=securityheaders
       - traefik.docker.network=traefik_proxy
 
-  nginx-ls-temp:
-    image: linuxserver/nginx
-    container_name: nginx-ls-temp
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-    volumes:
-      - ${USERDIR}/docker/nginx/ls-temp:/config
-    restart: unless-stopped
-    networks:
-      - traefik_proxy
-      - internal
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.ls-temp.rule=Host(`${LSDOMAINNAME}`, `${LSDOMAIN_TR}`, `${LSDOMAIN_SR}`)
-      - traefik.http.routers.ls-temp.entrypoints=https
-      - traefik.http.routers.ls-temp.tls=true
-      - traefik.http.routers.ls-temp.tls.options=default
-      - traefik.http.routers.ls-temp.tls.certresolver=cloudflare
-      - traefik.http.routers.ls-temp.middlewares=securityheaders
-      - traefik.docker.network=traefik_proxy
-
   deluge:
     image: linuxserver/deluge:5b398f77-ls22
     restart: unless-stopped
