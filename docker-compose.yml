@@ -437,6 +437,31 @@ services:
       - traefik.http.services.deluge.loadbalancer.server.port=8112
       - traefik.docker.network=traefik_proxy
 
+  calibre-web:
+    image: linuxserver/calibre-web
+    restart: unless-stopped
+    container_name: calibre-web
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - DOCKER_MODS=linuxserver/calibre-web:calibre
+    volumes:
+      - ${USERDIR}/docker/calibre/config:/config
+      - ${USERDIR}/docker/calibre/books:/books
+    networks:
+      - traefik_proxy
+      - internal
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.calibre.rule=Host(`calibre.${DOMAINNAME}`)
+      - traefik.http.routers.calibre.entrypoints=https
+      - traefik.http.routers.calibre.tls=true
+      - traefik.http.routers.calibre.tls.options=default
+      - traefik.http.routers.calibre.middlewares=auth,securityheaders
+      - traefik.http.services.calibre.loadbalancer.server.port=8083
+      - traefik.docker.network=traefik_proxy
+
 networks:
   traefik_proxy:
     external:
