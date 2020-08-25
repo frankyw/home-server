@@ -18,7 +18,7 @@ The following containers are being run:
 * [emby/embyserver:beta](https://hub.docker.com/r/emby/embyserver) - Official Emby beta container.
 * [adguard/adguardhome](https://hub.docker.com/r/adguard/adguardhome) - Official AdGuard Home container, DNS blackhole for all that spam.
 * [phpmyadmin/phpmyadmin](https://hub.docker.com/r/phpmyadmin/phpmyadmin) - Offical phpMyAdmin image for DB fiddling.
-* [linuxserver/duplicati]([https://hub.docker.com/r/linuxserver/duplicati](https://hub.docker.com/r/linuxserver/duplicati) - Duplicati container, a very flexible and easy to use system which provides the ability to backup files to the cloud.
+* [linuxserver/duplicati]([https://hub.docker.com/r/linuxserver/duplicati) - Duplicati container, a very flexible and easy to use system which provides the ability to backup files to the cloud.
 * [containrrr/watchtower](https://hub.docker.com/r/containrrr/watchtower) - Official Watchtower image to update all containers.
 * [google-containers/cadvisor](https://gcr.io/google-containers/cadvisor) - Collecting some stats (which I may never use!)
 * [linuxserver/calibre-web](https://hub.docker.com/r/linuxserver/calibre-web) - Provides a web UI to my Calibre eBook Library.
