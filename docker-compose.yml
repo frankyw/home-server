@@ -462,6 +462,21 @@ services:
       - traefik.http.services.calibre.loadbalancer.server.port=8083
       - traefik.docker.network=traefik_proxy
 
+  # timemachine:
+  #   image: mbentley/timemachine:smb
+  #   container_name: timemachine
+  #   hostname: timemachine
+  #   environment:
+  #     - TM_UID=${PUID}
+  #     - TM_GID=${PGID}
+  #     # - TM_USERNAME=frank
+  #     # - TM_GROUPNAME=docker
+  #     - DEBUG_LEVEL="10"
+  #   volumes:
+  #     - /mnt/timemachine:/opt/timemachine
+  #   networks:
+  #     - macvlan1
+
 networks:
   traefik_proxy:
     external:
