@@ -17,8 +17,7 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-      - CF_API_EMAIL=${CLOUDFLARE_EMAIL}
-      - CF_API_KEY=${CLOUDFLARE_API_KEY}
+      - CF_DNS_API_TOKEN=${CF_DNS_API_TOKEN}
     command:
       - --log.level=INFO
       - --entrypoints.http.address=:80
@@ -233,7 +232,7 @@ services:
       - traefik.docker.network=traefik_proxy
 
   portainer:
-    image: portainer/portainer:latest
+    image: portainer/portainer-ce
     container_name: portainer
     restart: always
     command: -H unix:///var/run/docker.sock
