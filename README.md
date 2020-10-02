@@ -23,7 +23,8 @@ The following containers are being run:
 * [google-containers/cadvisor](https://gcr.io/google-containers/cadvisor) - Collecting some stats (which I may never use!)
 * [linuxserver/calibre-web](https://hub.docker.com/r/linuxserver/calibre-web) - Provides a web UI to my Calibre eBook Library.
 * [mbentley/timemachine:smb](https://hub.docker.com/r/mbentley/timemachine) - Time Capsule for Time Machine backup onto network storage.
-
+* [oznu/homebridge](https://hub.docker.com/r/oznu/homebridge/) - Provides Apple Homekit functionality to non-supported devices on my network.
+* [oznu/cloudflare-ddns](https://hub.docker.com/r/oznu/cloudflare-ddns) - Cloudflare dynamic DNS updater.
 
 
 ## Configuration

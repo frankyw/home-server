@@ -463,6 +463,33 @@ services:
       - traefik.http.services.calibre.loadbalancer.server.port=8083
       - traefik.docker.network=traefik_proxy
 
+  homebridge:
+    image: oznu/homebridge:latest
+    restart: always
+    container_name: homebridge
+    network_mode: host
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - HOMEBRIDGE_CONFIG_UI=1
+      - HOMEBRIDGE_CONFIG_UI_PORT=8000
+    volumes:
+      - ${USERDIR}/docker/homebridge:/homebridge
+
+  cloudflare-ddns:
+    container_name: cloudflare-ddns
+    image: oznu/cloudflare-ddns:latest
+    restart: always
+    environment:
+      - API_KEY=${CF_DDNS_TOKEN}
+      - ZONE=${DOMAINNAME}
+      - PROXIED=true
+      - DNS_SERVER=1.1.1.1
+    networks:
+      - traefik_proxy
+      - internal
+
   # timemachine:
   #   image: mbentley/timemachine:smb
   #   container_name: timemachine
@@ -485,6 +512,6 @@ networks:
   internal:
     external:
       name: internal
-  macvlan1:
-    external:
-      name: macvlan1  
+  # macvlan1:
+  #   external:
+  #     name: macvlan1  
