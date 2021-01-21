@@ -28,6 +28,7 @@ services:
       - --providers.docker
       - --providers.docker.exposedbydefault=false
       - --providers.file.directory=/rules
+      - --providers.file.watch=true
       - --certificatesresolvers.cloudflare.acme.email=${FW_EMAIL}
       - --certificatesresolvers.cloudflare.acme.storage=/acme.json
       - --certificatesresolvers.cloudflare.acme.dnschallenge=true
@@ -187,6 +188,8 @@ services:
       - PGID=${PGID}
       - TZ=${TZ}
       - TRANSMISSION_WEB_HOME=/transmission-web-control/
+      - USER=${TRANSMISSION_USER}
+      - PASS=${TRANSMISSION_PASS}
     volumes:
       - ${USERDIR}/docker/transmission:/config
       - ${USERDIR}/TransmissionDL:/downloads
@@ -463,6 +466,28 @@ services:
       - traefik.http.services.calibre.loadbalancer.server.port=8083
       - traefik.docker.network=traefik_proxy
 
+  whoami:
+    image: containous/whoami
+    restart: unless-stopped
+    container_name: whoami
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    networks:
+      - traefik_proxy
+      - internal
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.whoami.rule=Host(`whoami.${DOMAINNAME}`)
+      - traefik.http.routers.whoami.entrypoints=https
+      - traefik.http.routers.whoami.tls=true
+      - traefik.http.routers.whoami.tls.options=default
+      - traefik.http.routers.whoami.middlewares=securityheaders
+      - traefik.http.services.whoami.loadbalancer.server.port=80
+      - traefik.docker.network=traefik_proxy
+
+
   homebridge:
     image: oznu/homebridge:latest
     restart: always
@@ -490,6 +515,30 @@ services:
       - traefik_proxy
       - internal
 
+  docassemble:
+    image: jhpyle/docassemble
+    restart: always
+    container_name: docassemble
+    environment:
+      - BEHINDHTTPSLOADBALANCER=true
+      - TIMEZONE=${TZ}
+      - USEHTTPS=false
+      - DAHOSTNAME=docassemble.${DOMAINNAME}
+    volumes:
+      - ${USERDIR}/docker/docassemble:/usr/share/docassemble/certs
+    networks:
+      - traefik_proxy
+      - internal
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.docassemble.rule=Host(`docassemble.${DOMAINNAME}`)
+      - traefik.http.routers.docassemble.entrypoints=https
+      - traefik.http.routers.docassemble.tls=true
+      - traefik.http.routers.docassemble.tls.options=default
+      - traefik.http.routers.docassemble.middlewares=securityheaders
+      - traefik.http.services.docassemble.loadbalancer.server.port=80
+      - traefik.docker.network=traefik_proxy
+  
   # timemachine:
   #   image: mbentley/timemachine:smb
   #   container_name: timemachine
