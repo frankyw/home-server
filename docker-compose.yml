@@ -1,4 +1,5 @@
-version: "3.7"
+version: "3.8"
+
 services:
 
   traefik:
@@ -166,7 +167,7 @@ services:
       - FG_LOG_LEVEL=INFO
     volumes:
       - ${USERDIR}/docker/flexget:/config
-      - /storage:/storage
+      - /tank/video:/storage
     networks:
       - traefik_proxy
       - internal
@@ -218,7 +219,7 @@ services:
     volumes:
       - ${USERDIR}/docker/filebot:/data
       - ${USERDIR}/TransmissionDL:/downloads
-      - /storage:/storage
+      - /tank/video:/video
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -307,7 +308,7 @@ services:
     image: emby/embyserver:beta
     volumes:
       - ${USERDIR}/docker/emby:/config
-      - /storage:/storage
+      - /tank/video:/video
       - ${USERDIR}/docker/shared:/shared
     ports:
       - 8096:8096/tcp
@@ -441,31 +442,6 @@ services:
       - traefik.http.services.deluge.loadbalancer.server.port=8112
       - traefik.docker.network=traefik_proxy
 
-  calibre-web:
-    image: linuxserver/calibre-web
-    restart: unless-stopped
-    container_name: calibre-web
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-      - DOCKER_MODS=linuxserver/calibre-web:calibre
-    volumes:
-      - ${USERDIR}/docker/calibre/config:/config
-      - ${USERDIR}/docker/calibre/books:/books
-    networks:
-      - traefik_proxy
-      - internal
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.calibre.rule=Host(`calibre.${DOMAINNAME}`)
-      - traefik.http.routers.calibre.entrypoints=https
-      - traefik.http.routers.calibre.tls=true
-      - traefik.http.routers.calibre.tls.options=default
-      - traefik.http.routers.calibre.middlewares=auth,securityheaders
-      - traefik.http.services.calibre.loadbalancer.server.port=8083
-      - traefik.docker.network=traefik_proxy
-
   whoami:
     image: containous/whoami
     restart: unless-stopped
@@ -486,7 +462,6 @@ services:
       - traefik.http.routers.whoami.middlewares=securityheaders
       - traefik.http.services.whoami.loadbalancer.server.port=80
       - traefik.docker.network=traefik_proxy
-
 
   homebridge:
     image: oznu/homebridge:latest
@@ -515,44 +490,46 @@ services:
       - traefik_proxy
       - internal
 
-  docassemble:
-    image: jhpyle/docassemble
-    restart: always
-    container_name: docassemble
+  nginx-forsale:
+    image: linuxserver/nginx
+    container_name: nginx-forsale
     environment:
-      - BEHINDHTTPSLOADBALANCER=true
-      - TIMEZONE=${TZ}
-      - USEHTTPS=false
-      - DAHOSTNAME=docassemble.${DOMAINNAME}
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
     volumes:
-      - ${USERDIR}/docker/docassemble:/usr/share/docassemble/certs
+      - ${USERDIR}/docker/nginx/forsale:/config
+    restart: unless-stopped
     networks:
       - traefik_proxy
       - internal
     labels:
       - traefik.enable=true
-      - traefik.http.routers.docassemble.rule=Host(`docassemble.${DOMAINNAME}`)
-      - traefik.http.routers.docassemble.entrypoints=https
-      - traefik.http.routers.docassemble.tls=true
-      - traefik.http.routers.docassemble.tls.options=default
-      - traefik.http.routers.docassemble.middlewares=securityheaders
-      - traefik.http.services.docassemble.loadbalancer.server.port=80
+      - traefik.http.routers.forsale.rule=HostRegexp(`${FORSALE1}`, `${FORSALE2}`, `${FORSALE3}`)
+      - traefik.http.routers.forsale.entrypoints=http
+      - traefik.http.routers.forsale.middlewares=securityheaders
       - traefik.docker.network=traefik_proxy
-  
-  # timemachine:
-  #   image: mbentley/timemachine:smb
-  #   container_name: timemachine
-  #   hostname: timemachine
-  #   environment:
-  #     - TM_UID=${PUID}
-  #     - TM_GID=${PGID}
-  #     # - TM_USERNAME=frank
-  #     # - TM_GROUPNAME=docker
-  #     - DEBUG_LEVEL="10"
-  #   volumes:
-  #     - /mnt/timemachine:/opt/timemachine
-  #   networks:
-  #     - macvlan1
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    restart: always
+    command: --web.enable-lifecycle  --config.file=/etc/prometheus/prometheus.yml
+    volumes:
+      - ${USERDIR}/docker/prometheus:/etc/prometheus
+      - prometheus-data:/prometheus
+    networks:
+      - traefik_proxy
+      - internal
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.prometheus.rule=Host(`prometheus.${DOMAINNAME}`)
+      - traefik.http.routers.prometheus.entrypoints=https
+      - traefik.http.routers.prometheus.tls=true
+      - traefik.http.routers.prometheus.tls.options=default
+      - traefik.http.routers.prometheus.middlewares=securityheaders
+      - traefik.http.services.prometheus.loadbalancer.server.port=9090
+      - traefik.docker.network=traefik_proxy
 
 networks:
   traefik_proxy:
@@ -564,3 +541,7 @@ networks:
   # macvlan1:
   #   external:
   #     name: macvlan1  
+
+volumes:
+  prometheus-data:
+    external: true
