@@ -527,7 +527,8 @@ services:
       - traefik.http.routers.prometheus.entrypoints=https
       - traefik.http.routers.prometheus.tls=true
       - traefik.http.routers.prometheus.tls.options=default
-      - traefik.http.routers.prometheus.middlewares=securityheaders
+      - traefik.http.routers.prometheus.middlewares=securityheaders,grafanaauth
+      - traefik.http.middlewares.grafanaauth.basicauth.usersfile=/shared/.htpasswd
       - traefik.http.services.prometheus.loadbalancer.server.port=9090
       - traefik.docker.network=traefik_proxy
 
