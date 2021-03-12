@@ -25,6 +25,7 @@ services:
       - --global.sendAnonymousUsage=true
       - --entrypoints.http.address=:80
       - --entrypoints.https.address=:443
+      - --entrypoints.https.http.tls.options=default
       - --entrypoints.https.forwardedHeaders.trustedIPs=173.245.48.0/20,103.21.244.0/22,103.22.200.0/22,103.31.4.0/22,141.101.64.0/18,108.162.192.0/18,190.93.240.0/20,188.114.96.0/20,197.234.240.0/22,198.41.128.0/17,162.158.0.0/15,104.16.0.0/12,172.64.0.0/13,131.0.72.0/22
       - --providers.docker
       - --providers.docker.exposedbydefault=false
@@ -36,13 +37,13 @@ services:
       - --certificatesresolvers.cloudflare.acme.dnschallenge.provider=cloudflare
       - --certificatesResolvers.cloudflare.acme.dnsChallenge.resolvers=1.1.1.1:53,1.0.0.1:53
       - --certificatesResolvers.cloudflare.acme.dnsChallenge.delayBeforeCheck=90
-      - --serverstransport.insecureSkipVerify=true
+      # - --serverstransport.insecureSkipVerify=true
     labels:
       - traefik.enable=true
       - traefik.http.routers.traefik.rule=Host(`traefik.${DOMAINNAME}`)
       - traefik.http.routers.traefik.entrypoints=https
       - traefik.http.routers.traefik.tls=true
-      - traefik.http.routers.traefik.tls.certresolver=cloudflare
+      # - traefik.http.routers.traefik.tls.certresolver=cloudflare
       - traefik.http.routers.traefik.tls.options=default
       - traefik.http.routers.traefik.middlewares=auth,securityheaders
       - traefik.http.routers.traefik.service=api@internal
@@ -194,6 +195,7 @@ services:
     volumes:
       - ${USERDIR}/docker/transmission:/config
       - ${USERDIR}/TransmissionDL:/downloads
+      - /tank/video/TransmissionDL:/tankdownloads
     ports:
       - 55700:55700
       - 9091:9091
@@ -490,24 +492,46 @@ services:
       - traefik_proxy
       - internal
 
-  nginx-forsale:
+  nginx-cb:
     image: linuxserver/nginx
-    container_name: nginx-forsale
+    container_name: nginx-cb
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
     volumes:
-      - ${USERDIR}/docker/nginx/forsale:/config
+      - ${USERDIR}/docker/nginx/cb:/config
     restart: unless-stopped
     networks:
       - traefik_proxy
       - internal
     labels:
       - traefik.enable=true
-      - traefik.http.routers.forsale.rule=HostRegexp(`${FORSALE1}`, `${FORSALE2}`, `${FORSALE3}`)
-      - traefik.http.routers.forsale.entrypoints=http
-      - traefik.http.routers.forsale.middlewares=securityheaders
+      - traefik.http.routers.nginx-cb.rule=HostRegexp(`{subdomain:[a-z\d_-]+}.${CBDOMAINNAME}`, `${CBDOMAINNAME}`)
+      - traefik.http.routers.nginx-cb.entrypoints=https
+      - traefik.http.routers.nginx-cb.tls=true
+      - traefik.http.routers.nginx-cb.tls.options=default
+      - traefik.http.routers.nginx-cb.tls.certresolver=cloudflare
+      - traefik.http.routers.nginx-cb.tls.domains[0].main=${CBDOMAINNAME}
+      - traefik.http.routers.nginx-cb.tls.domains[0].sans=*.${CBDOMAINNAME}
+      - traefik.http.routers.nginx-cb.middlewares=securityheaders
+      - traefik.docker.network=traefik_proxy
+
+  browserless-chrome:
+    image: browserless/chrome
+    container_name: browserless-chrome
+    restart: unless-stopped
+    networks:
+      - traefik_proxy
+      - internal
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.browserless-chrome.rule=Host(`chrome.${DOMAINNAME}`)
+      - traefik.http.routers.browserless-chrome.entrypoints=https
+      - traefik.http.routers.browserless-chrome.tls=true
+      - traefik.http.routers.browserless-chrome.tls.options=default
+      - traefik.http.routers.browserless-chrome.middlewares=auth,securityheaders
+      - traefik.http.services.browserless-chrome.loadbalancer.server.port=3000
       - traefik.docker.network=traefik_proxy
 
   prometheus:
