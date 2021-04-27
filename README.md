@@ -16,7 +16,6 @@ The following containers are being run:
 * [mariadb:latest](https://hub.docker.com/_/mariadb) - Official MariaDB image.
 * [portainer/portainer](https://hub.docker.com/r/portainer/portainer) - Official Portainer image, docker container management made easy.
 * [emby/embyserver:beta](https://hub.docker.com/r/emby/embyserver) - Official Emby beta container, home media server.
-* [adguard/adguardhome](https://hub.docker.com/r/adguard/adguardhome) - Official AdGuard Home container, DNS blackhole for all that spam.
 * [phpmyadmin/phpmyadmin](https://hub.docker.com/r/phpmyadmin/phpmyadmin) - Offical phpMyAdmin image for DB fiddling.
 * [linuxserver/duplicati](https://hub.docker.com/r/linuxserver/duplicati) - Duplicati container, backs up important files on my Linux server files to Google Drive.
 * [containrrr/watchtower](https://hub.docker.com/r/containrrr/watchtower) - Official Watchtower image to update all containers.
