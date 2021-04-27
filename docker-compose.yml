@@ -89,29 +89,6 @@ services:
       - traefik.http.services.duplicati.loadbalancer.server.port=8200
       - traefik.docker.network=traefik_proxy
 
-  adguard-home:
-    image: adguard/adguardhome
-    container_name: adguard-home
-    restart: always
-    volumes:
-      - ${USERDIR}/docker/adguard:/opt/adguardhome/work
-      - ${USERDIR}/docker/adguard:/opt/adguardhome/conf
-    ports:
-      - "53:53"
-      - "53:53/udp"
-    networks:
-      - traefik_proxy
-      - internal
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.adguard.rule=Host(`adguard.${DOMAINNAME}`)
-      - traefik.http.routers.adguard.entrypoints=https
-      - traefik.http.routers.adguard.tls=true
-      - traefik.http.routers.adguard.tls.options=default
-      - traefik.http.routers.adguard.middlewares=securityheaders
-      - traefik.http.services.adguard.loadbalancer.server.port=80
-      - traefik.docker.network=traefik_proxy
-
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     container_name: phpmyadmin
@@ -203,7 +180,7 @@ services:
     restart: unless-stopped
     networks:
       - traefik_proxy
-      - internal
+      - fw_macvlan
     labels:
       - traefik.enable=true
       - traefik.http.routers.transmission.rule=Host(`transmission.${DOMAINNAME}`)
@@ -433,7 +410,7 @@ services:
       - "54700:54700/udp"
     networks:
       - traefik_proxy
-      - internal
+      - fw_macvlan
     labels:
       - traefik.enable=true
       - traefik.http.routers.deluge.rule=Host(`deluge.${DOMAINNAME}`)
@@ -466,10 +443,9 @@ services:
       - traefik.docker.network=traefik_proxy
 
   homebridge:
-    image: oznu/homebridge:latest
+    image: oznu/homebridge:no-avahi
     restart: always
     container_name: homebridge
-    network_mode: host
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -478,6 +454,8 @@ services:
       - HOMEBRIDGE_CONFIG_UI_PORT=8000
     volumes:
       - ${USERDIR}/docker/homebridge:/homebridge
+    networks:
+      - fw_macvlan
 
   cloudflare-ddns:
     container_name: cloudflare-ddns
@@ -556,6 +534,21 @@ services:
       - traefik.http.services.prometheus.loadbalancer.server.port=9090
       - traefik.docker.network=traefik_proxy
 
+  timemachine:
+    image: mbentley/timemachine:smb
+    container_name: timemachine
+    hostname: timemachine
+    environment:
+      - TM_UID=${PUID}
+      - TM_GID=${PGID}
+      - TM_USERNAME=timemachine
+      - PASSWORD=timemachine
+      - VOLUME_SIZE_LIMIT="500 G"
+    volumes:
+      - /tank/downloads/timemachine:/opt/timemachine
+    networks:
+      - fw_macvlan
+      
 networks:
   traefik_proxy:
     external:
@@ -563,9 +556,9 @@ networks:
   internal:
     external:
       name: internal
-  # macvlan1:
-  #   external:
-  #     name: macvlan1  
+  fw_macvlan:
+    external:
+      name: fw_macvlan  
 
 volumes:
   prometheus-data:
