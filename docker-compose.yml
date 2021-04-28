@@ -443,7 +443,7 @@ services:
       - traefik.docker.network=traefik_proxy
 
   homebridge:
-    image: oznu/homebridge:no-avahi
+    image: oznu/homebridge:latest
     restart: always
     container_name: homebridge
     environment:
