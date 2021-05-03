@@ -371,29 +371,6 @@ services:
       - traefik.http.routers.fmw.middlewares=securityheaders
       - traefik.docker.network=traefik_proxy
 
-  nginx-thcuk:
-    image: linuxserver/nginx
-    container_name: nginx-thcuk
-    environment:
-      - PUID=1001
-      - PGID=${PGID}
-      - TZ=${TZ}
-    volumes:
-      - /home/thc:/config
-    restart: unless-stopped
-    networks:
-      - traefik_proxy
-      - internal
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.thcuk.rule=Host(`${THCDOMAINNAME}`)
-      - traefik.http.routers.thcuk.entrypoints=https
-      - traefik.http.routers.thcuk.tls=true
-      - traefik.http.routers.thcuk.tls.options=default
-      - traefik.http.routers.thcuk.tls.certresolver=cloudflare
-      - traefik.http.routers.thcuk.middlewares=securityheaders
-      - traefik.docker.network=traefik_proxy
-
   deluge:
     image: linuxserver/deluge:5b398f77-ls22
     restart: unless-stopped
