@@ -179,8 +179,9 @@ services:
       - 55700:55700/udp
     restart: unless-stopped
     networks:
-      - traefik_proxy
-      - fw_macvlan
+      traefik_proxy:
+      fw_macvlan:
+        ipv4_address: ${STATICIP_TRANSMISSION}
     labels:
       - traefik.enable=true
       - traefik.http.routers.transmission.rule=Host(`transmission.${DOMAINNAME}`)
@@ -265,7 +266,9 @@ services:
       - 8880:8880
       - 6789:6789
     networks:
-      - traefik_proxy
+      traefik_proxy:
+      fw_macvlan:
+        ipv4_address: ${STATICIP_UNIFI}
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -299,7 +302,9 @@ services:
     devices:
       - /dev/dri/renderD128:/dev/dri/renderD128
     networks:
-      - traefik_proxy
+      traefik_proxy:
+      fw_macvlan:
+        ipv4_address: ${STATICIP_EMBY}
     labels:
       - traefik.enable=true
       - traefik.http.routers.emby.rule=Host(`media.${DOMAINNAME}`)
@@ -386,8 +391,9 @@ services:
       - "54700:54700"
       - "54700:54700/udp"
     networks:
-      - traefik_proxy
-      - fw_macvlan
+      traefik_proxy:
+      fw_macvlan:
+        ipv4_address: ${STATICIP_DELUGE}
     labels:
       - traefik.enable=true
       - traefik.http.routers.deluge.rule=Host(`deluge.${DOMAINNAME}`)
@@ -432,7 +438,8 @@ services:
     volumes:
       - ${USERDIR}/docker/homebridge:/homebridge
     networks:
-      - fw_macvlan
+      fw_macvlan:
+        ipv4_address: ${STATICIP_HOMEBRIDGE}
 
   cloudflare-ddns:
     container_name: cloudflare-ddns
@@ -445,7 +452,6 @@ services:
       - DNS_SERVER=1.1.1.1
     networks:
       - traefik_proxy
-      - internal
 
   nginx-cb:
     image: linuxserver/nginx
@@ -514,6 +520,7 @@ services:
   timemachine:
     image: mbentley/timemachine:smb
     container_name: timemachine
+    restart: unless-stopped
     hostname: timemachine
     environment:
       - TM_UID=${PUID}
@@ -524,7 +531,9 @@ services:
     volumes:
       - /tank/downloads/timemachine:/opt/timemachine
     networks:
-      - fw_macvlan
+      fw_macvlan:
+        ipv4_address: ${STATICIP_TIMEMACHINE}
+
       
 networks:
   traefik_proxy:
@@ -535,7 +544,7 @@ networks:
       name: internal
   fw_macvlan:
     external:
-      name: fw_macvlan  
+      name: fw_macvlan
 
 volumes:
   prometheus-data:
