@@ -1,6 +1,6 @@
 # frankyw/home-server
 
-This is a repository to version control and document my journey from one Ubuntu server with a multitude of apps running on it, to complete Docker containerization. Base system is Ubuntu 20. To create this config, I referenced [Smart Home Beginner](https://www.smarthomebeginner.com/category/home-server/) quite a bit.
+This is a repository to version control and document my journey from one Ubuntu server with a multitude of apps running on it, to complete Docker containerization. Base system is Ubuntu 21. To create this config, I referenced [Smart Home Beginner](https://www.smarthomebeginner.com/category/home-server/) quite a bit.
 
 ## Docker Containers
 
