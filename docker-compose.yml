@@ -37,6 +37,7 @@ services:
       - --certificatesresolvers.cloudflare.acme.dnschallenge.provider=cloudflare
       - --certificatesResolvers.cloudflare.acme.dnsChallenge.resolvers=1.1.1.1:53,1.0.0.1:53
       - --certificatesResolvers.cloudflare.acme.dnsChallenge.delayBeforeCheck=90
+      - --pilot.token=${PILOT_TOKEN}
       # - --serverstransport.insecureSkipVerify=true
     labels:
       - traefik.enable=true
@@ -298,7 +299,7 @@ services:
       - UID=${PUID}
       - GID=${PGID}
       - TZ=${TZ}
-      - GIDLIST=${PGID},44
+      - GIDLIST=${PGID},44,139
     devices:
       - /dev/dri/renderD128:/dev/dri/renderD128
     networks:
