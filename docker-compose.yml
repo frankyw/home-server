@@ -378,7 +378,7 @@ services:
       - traefik.docker.network=traefik_proxy
 
   deluge:
-    image: linuxserver/deluge:5b398f77-ls22
+    image: linuxserver/deluge:2.0.5
     restart: unless-stopped
     container_name: deluge
     environment:
