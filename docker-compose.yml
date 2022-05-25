@@ -112,7 +112,7 @@ services:
       - traefik.docker.network=traefik_proxy
       
   cadvisor:
-    image: gcr.io/google-containers/cadvisor
+    image: gcr.io/cadvisor/cadvisor
     container_name: cadvisor
     restart: always
     volumes:
@@ -535,17 +535,16 @@ services:
       fw_macvlan:
         ipv4_address: ${STATICIP_TIMEMACHINE}
 
-      
 networks:
   traefik_proxy:
-    external:
-      name: traefik_proxy
+    name: traefik_proxy
+    external: true
   internal:
-    external:
-      name: internal
+    name: internal
+    external: true
   fw_macvlan:
-    external:
-      name: fw_macvlan
+    name: fw_macvlan
+    external: true
 
 volumes:
   prometheus-data:
