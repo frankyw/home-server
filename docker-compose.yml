@@ -37,8 +37,6 @@ services:
       - --certificatesresolvers.cloudflare.acme.dnschallenge.provider=cloudflare
       - --certificatesResolvers.cloudflare.acme.dnsChallenge.resolvers=1.1.1.1:53,1.0.0.1:53
       - --certificatesResolvers.cloudflare.acme.dnsChallenge.delayBeforeCheck=90
-      - --pilot.token=${PILOT_TOKEN}
-      # - --serverstransport.insecureSkipVerify=true
     labels:
       - traefik.enable=true
       - traefik.http.routers.traefik.rule=Host(`traefik.${DOMAINNAME}`)
@@ -207,7 +205,7 @@ services:
       - TZ=${TZ}
     networks:
       - traefik_proxy
-      - internal
+      - internal 
     labels:
       - traefik.enable=true
       - traefik.http.routers.filebot.rule=Host(`filebot.${DOMAINNAME}`)
@@ -352,29 +350,54 @@ services:
       - traefik.http.routers.frank.middlewares=securityheaders
       - traefik.docker.network=traefik_proxy
 
-  nginx-fmw:
+  # nginx-fmw:
+  #   image: linuxserver/nginx
+  #   container_name: nginx-fmw
+  #   environment:
+  #     - PUID=${PUID}
+  #     - PGID=${PGID}
+  #     - TZ=${TZ}
+  #   volumes:
+  #     - ${USERDIR}/docker/nginx/fmw:/config
+  #   restart: unless-stopped
+  #   networks:
+  #     - traefik_proxy
+  #     - internal
+  #   labels:
+  #     - traefik.enable=true
+  #     - traefik.http.routers.fmw.rule=Host(`${FMWDOMAINNAME}`)
+  #     - traefik.http.routers.fmw.entrypoints=https
+  #     - traefik.http.routers.fmw.tls=true
+  #     - traefik.http.routers.fmw.tls.options=default
+  #     - traefik.http.routers.fmw.tls.certresolver=cloudflare
+  #     - traefik.http.routers.fmw.tls.domains[0].main=${FMWDOMAINNAME}
+  #     - traefik.http.routers.fmw.tls.domains[0].sans=*.${FMWDOMAINNAME}
+  #     - traefik.http.routers.fmw.middlewares=securityheaders
+  #     - traefik.docker.network=traefik_proxy
+
+  nginx-esim:
     image: linuxserver/nginx
-    container_name: nginx-fmw
+    container_name: nginx-esim
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
     volumes:
-      - ${USERDIR}/docker/nginx/fmw:/config
+      - ${USERDIR}/docker/nginx/esim:/config
     restart: unless-stopped
     networks:
       - traefik_proxy
       - internal
     labels:
       - traefik.enable=true
-      - traefik.http.routers.fmw.rule=Host(`${FMWDOMAINNAME}`)
-      - traefik.http.routers.fmw.entrypoints=https
-      - traefik.http.routers.fmw.tls=true
-      - traefik.http.routers.fmw.tls.options=default
-      - traefik.http.routers.fmw.tls.certresolver=cloudflare
-      - traefik.http.routers.fmw.tls.domains[0].main=${FMWDOMAINNAME}
-      - traefik.http.routers.fmw.tls.domains[0].sans=*.${FMWDOMAINNAME}
-      - traefik.http.routers.fmw.middlewares=securityheaders
+      - traefik.http.routers.esim.rule=Host(`${ESIMDOMAINNAME}`)
+      - traefik.http.routers.esim.entrypoints=https
+      - traefik.http.routers.esim.tls=true
+      - traefik.http.routers.esim.tls.options=default
+      - traefik.http.routers.esim.tls.certresolver=cloudflare
+      - traefik.http.routers.esim.tls.domains[0].main=${ESIMDOMAINNAME}
+      - traefik.http.routers.esim.tls.domains[0].sans=*.${ESIMDOMAINNAME}
+      - traefik.http.routers.esim.middlewares=securityheaders
       - traefik.docker.network=traefik_proxy
 
   deluge:
