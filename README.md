@@ -15,14 +15,12 @@ The following containers are being run:
 * [rednoah/filebot:node](https://hub.docker.com/r/rednoah/filebot/) - Headless Filebot container, used for automated extraction of downloads via REST calls.
 * [mariadb:latest](https://hub.docker.com/_/mariadb) - Official MariaDB image.
 * [portainer/portainer](https://hub.docker.com/r/portainer/portainer) - Official Portainer image, docker container management made easy.
-* [emby/embyserver:beta](https://hub.docker.com/r/emby/embyserver) - Official Emby beta container, home media server.
 * [phpmyadmin/phpmyadmin](https://hub.docker.com/r/phpmyadmin/phpmyadmin) - Offical phpMyAdmin image for DB fiddling.
 * [linuxserver/duplicati](https://hub.docker.com/r/linuxserver/duplicati) - Duplicati container, backs up important files on my Linux server files to Google Drive.
 * [containrrr/watchtower](https://hub.docker.com/r/containrrr/watchtower) - Official Watchtower image to update all containers.
 * [oznu/homebridge](https://hub.docker.com/r/oznu/homebridge/) - Provides Apple Homekit functionality to non-supported devices on my network.
 * [oznu/cloudflare-ddns](https://hub.docker.com/r/oznu/cloudflare-ddns) - Cloudflare dynamic DNS updater.
 * [google-containers/cadvisor](https://gcr.io/google-containers/cadvisor) - Collecting some stats for use by Prometheus.
-* [prom/prometheus](https://hub.docker.com/r/prom/prometheus/) - Prometheus stats collection, which I used to collect metrics on docker containers and the host machine. Used in conjunction with Grafana cloud.
 * [mbentley/timemachine:smb](https://hub.docker.com/r/mbentley/timemachine) - Time Capsule for Time Machine backup onto network storage.
 
 ## Configuration

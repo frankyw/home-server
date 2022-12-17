@@ -9,7 +9,6 @@ services:
     restart: always
     domainname: ${DOMAINNAME}
     networks:
-      - internal
       - traefik_proxy
     ports:
       - 80:80
@@ -64,158 +63,6 @@ services:
       - $USERDIR/docker/traefik/acme/acme.json:/acme.json
       - $USERDIR/docker/traefik/rules:/rules 
 
-  duplicati:
-    image: linuxserver/duplicati
-    container_name: duplicati
-    restart: always
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-    volumes:
-      - ${USERDIR}/docker/duplicati:/config
-      - ${USERDIR}:/source
-    networks:
-      - traefik_proxy
-      - internal
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.duplicati.rule=Host(`duplicati.${DOMAINNAME}`)
-      - traefik.http.routers.duplicati.entrypoints=https
-      - traefik.http.routers.duplicati.tls=true
-      - traefik.http.routers.duplicati.tls.options=default
-      - traefik.http.routers.duplicati.middlewares=auth,securityheaders
-      - traefik.http.services.duplicati.loadbalancer.server.port=8200
-      - traefik.docker.network=traefik_proxy
-
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    container_name: phpmyadmin
-    restart: always
-    environment:
-      - PMA_HOST=mariadb
-    depends_on:
-      - mariadb
-    networks:
-      - traefik_proxy
-      - internal
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.phpma.rule=Host(`phpma.${DOMAINNAME}`)
-      - traefik.http.routers.phpma.entrypoints=https
-      - traefik.http.routers.phpma.tls=true
-      - traefik.http.routers.phpma.tls.options=default
-      - traefik.http.routers.phpma.middlewares=securityheaders
-      - traefik.http.services.phpma.loadbalancer.server.port=80
-      - traefik.docker.network=traefik_proxy
-      
-  cadvisor:
-    image: gcr.io/cadvisor/cadvisor
-    container_name: cadvisor
-    restart: always
-    volumes:
-      - /:/rootfs:ro
-      - /var/run:/var/run:ro
-      - /sys:/sys:ro
-      - /var/lib/docker/:/var/lib/docker:ro
-      - /dev/disk/:/dev/disk:ro
-    networks:
-      - traefik_proxy
-      - internal
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.cadvisor.rule=Host(`cadvisor.${DOMAINNAME}`)
-      - traefik.http.routers.cadvisor.entrypoints=https
-      - traefik.http.routers.cadvisor.tls=true
-      - traefik.http.routers.cadvisor.tls.options=default
-      - traefik.http.routers.cadvisor.middlewares=auth,securityheaders
-      - traefik.http.services.cadvisor.loadbalancer.server.port=8080
-      - traefik.docker.network=traefik_proxy
-
-  flexget:
-    image: wiserain/flexget
-    container_name: flexget
-    restart: always
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-      - FG_WEBUI_PASSWD=${FLEXGET_PASSWORD}
-      - FG_LOG_LEVEL=INFO
-    volumes:
-      - ${USERDIR}/docker/flexget:/config
-      - /tank/video:/storage
-    networks:
-      - traefik_proxy
-      - internal
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.flexget.rule=Host(`flexget.${DOMAINNAME}`)
-      - traefik.http.routers.flexget.entrypoints=https
-      - traefik.http.routers.flexget.tls=true
-      - traefik.http.routers.flexget.tls.options=default
-      - traefik.http.routers.flexget.middlewares=securityheaders
-      - traefik.http.services.flexget.loadbalancer.server.port=5050
-      - traefik.docker.network=traefik_proxy
-      
-  transmission:
-    image: linuxserver/transmission:latest
-    container_name: transmission
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-      - TRANSMISSION_WEB_HOME=/transmission-web-control/
-      - USER=${TRANSMISSION_USER}
-      - PASS=${TRANSMISSION_PASS}
-    volumes:
-      - ${USERDIR}/docker/transmission:/config
-      - ${USERDIR}/TransmissionDL:/downloads
-      - /tank/video/TransmissionDL:/tankdownloads
-    ports:
-      - 55700:55700
-      - 9091:9091
-      - 55700:55700/udp
-    restart: unless-stopped
-    networks:
-      traefik_proxy:
-      fw_macvlan:
-        ipv4_address: ${STATICIP_TRANSMISSION}
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.transmission.rule=Host(`transmission.${DOMAINNAME}`)
-      - traefik.http.routers.transmission.entrypoints=https
-      - traefik.http.routers.transmission.tls=true
-      - traefik.http.routers.transmission.tls.options=default
-      - traefik.http.routers.transmission.middlewares=securityheaders
-      - traefik.http.services.transmission.loadbalancer.server.port=9091
-      - traefik.docker.network=traefik_proxy
-
-  filebot-node:
-    image: rednoah/filebot:node
-    container_name: filebot-node
-    restart: always
-    volumes:
-      - ${USERDIR}/docker/filebot:/data
-      - ${USERDIR}/TransmissionDL:/downloads
-      - /tank/video:/video
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-    networks:
-      - traefik_proxy
-      - internal 
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.filebot.rule=Host(`filebot.${DOMAINNAME}`)
-      - traefik.http.routers.filebot.entrypoints=https
-      - traefik.http.routers.filebot.tls=true
-      - traefik.http.routers.filebot.tls.options=default
-      - traefik.http.routers.filebot.middlewares=auth,securityheaders
-      - traefik.http.services.filebot.loadbalancer.server.port=5452
-      - traefik.docker.network=traefik_proxy
-
   portainer:
     image: portainer/portainer-ce
     container_name: portainer
@@ -239,16 +86,28 @@ services:
       - traefik.http.services.portainer.loadbalancer.server.port=9000
       - traefik.docker.network=traefik_proxy
 
-  watchtower:
-    container_name: watchtower
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor
+    container_name: cadvisor
     restart: always
-    image: containrrr/watchtower
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    command: --cleanup
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
     networks:
-      - internal
-      
+      - traefik_proxy
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.cadvisor.rule=Host(`cadvisor.${DOMAINNAME}`)
+      - traefik.http.routers.cadvisor.entrypoints=https
+      - traefik.http.routers.cadvisor.tls=true
+      - traefik.http.routers.cadvisor.tls.options=default
+      - traefik.http.routers.cadvisor.middlewares=auth,securityheaders
+      - traefik.http.services.cadvisor.loadbalancer.server.port=8080
+      - traefik.docker.network=traefik_proxy
+
   unifi-controller:
     image: linuxserver/unifi-controller
     container_name: unifi-controller
@@ -283,37 +142,6 @@ services:
       - traefik.http.services.unifi.loadbalancer.server.scheme=https
       - traefik.docker.network=traefik_proxy
 
-  emby:
-    container_name: emby
-    restart: always
-    image: emby/embyserver:beta
-    volumes:
-      - ${USERDIR}/docker/emby:/config
-      - /tank/video:/video
-      - ${USERDIR}/docker/shared:/shared
-    ports:
-      - 8096:8096/tcp
-    environment:
-      - UID=${PUID}
-      - GID=${PGID}
-      - TZ=${TZ}
-      - GIDLIST=${PGID},44,139
-    devices:
-      - /dev/dri/renderD128:/dev/dri/renderD128
-    networks:
-      traefik_proxy:
-      fw_macvlan:
-        ipv4_address: ${STATICIP_EMBY}
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.emby.rule=Host(`media.${DOMAINNAME}`)
-      - traefik.http.routers.emby.entrypoints=https
-      - traefik.http.routers.emby.tls=true
-      - traefik.http.routers.emby.tls.options=default
-      - traefik.http.routers.emby.middlewares=securityheaders
-      - traefik.http.services.emby.loadbalancer.server.port=8096
-      - traefik.docker.network=traefik_proxy
-
   mariadb:
     image: linuxserver/mariadb
     container_name: mariadb
@@ -326,7 +154,27 @@ services:
     volumes:
       - ${USERDIR}/docker/mariadb:/config
     networks:
-      - internal
+      - traefik_proxy
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    restart: always
+    environment:
+      - PMA_HOST=mariadb
+    depends_on:
+      - mariadb
+    networks:
+      - traefik_proxy
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.phpma.rule=Host(`phpma.${DOMAINNAME}`)
+      - traefik.http.routers.phpma.entrypoints=https
+      - traefik.http.routers.phpma.tls=true
+      - traefik.http.routers.phpma.tls.options=default
+      - traefik.http.routers.phpma.middlewares=securityheaders
+      - traefik.http.services.phpma.loadbalancer.server.port=80
+      - traefik.docker.network=traefik_proxy
 
   nginx-frank:
     image: linuxserver/nginx
@@ -340,7 +188,6 @@ services:
     restart: unless-stopped
     networks:
       - traefik_proxy
-      - internal
     labels:
       - traefik.enable=true
       - traefik.http.routers.frank.rule=Host(`${DOMAINNAME}`)
@@ -349,31 +196,6 @@ services:
       - traefik.http.routers.frank.tls.options=default
       - traefik.http.routers.frank.middlewares=securityheaders
       - traefik.docker.network=traefik_proxy
-
-  # nginx-fmw:
-  #   image: linuxserver/nginx
-  #   container_name: nginx-fmw
-  #   environment:
-  #     - PUID=${PUID}
-  #     - PGID=${PGID}
-  #     - TZ=${TZ}
-  #   volumes:
-  #     - ${USERDIR}/docker/nginx/fmw:/config
-  #   restart: unless-stopped
-  #   networks:
-  #     - traefik_proxy
-  #     - internal
-  #   labels:
-  #     - traefik.enable=true
-  #     - traefik.http.routers.fmw.rule=Host(`${FMWDOMAINNAME}`)
-  #     - traefik.http.routers.fmw.entrypoints=https
-  #     - traefik.http.routers.fmw.tls=true
-  #     - traefik.http.routers.fmw.tls.options=default
-  #     - traefik.http.routers.fmw.tls.certresolver=cloudflare
-  #     - traefik.http.routers.fmw.tls.domains[0].main=${FMWDOMAINNAME}
-  #     - traefik.http.routers.fmw.tls.domains[0].sans=*.${FMWDOMAINNAME}
-  #     - traefik.http.routers.fmw.middlewares=securityheaders
-  #     - traefik.docker.network=traefik_proxy
 
   nginx-esim:
     image: linuxserver/nginx
@@ -387,7 +209,6 @@ services:
     restart: unless-stopped
     networks:
       - traefik_proxy
-      - internal
     labels:
       - traefik.enable=true
       - traefik.http.routers.esim.rule=Host(`${ESIMDOMAINNAME}`)
@@ -398,6 +219,127 @@ services:
       - traefik.http.routers.esim.tls.domains[0].main=${ESIMDOMAINNAME}
       - traefik.http.routers.esim.tls.domains[0].sans=*.${ESIMDOMAINNAME}
       - traefik.http.routers.esim.middlewares=securityheaders
+      - traefik.docker.network=traefik_proxy
+
+  nginx-cb:
+    image: linuxserver/nginx
+    container_name: nginx-cb
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${USERDIR}/docker/nginx/cb:/config
+    restart: unless-stopped
+    networks:
+      - traefik_proxy
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.nginx-cb.rule=HostRegexp(`{subdomain:[a-z\d_-]+}.${CBDOMAINNAME}`, `${CBDOMAINNAME}`)
+      - traefik.http.routers.nginx-cb.entrypoints=https
+      - traefik.http.routers.nginx-cb.tls=true
+      - traefik.http.routers.nginx-cb.tls.options=default
+      - traefik.http.routers.nginx-cb.tls.certresolver=cloudflare
+      - traefik.http.routers.nginx-cb.tls.domains[0].main=${CBDOMAINNAME}
+      - traefik.http.routers.nginx-cb.tls.domains[0].sans=*.${CBDOMAINNAME}
+      - traefik.http.routers.nginx-cb.middlewares=securityheaders
+      - traefik.docker.network=traefik_proxy
+
+  browserless-chrome:
+    image: browserless/chrome
+    container_name: browserless-chrome
+    restart: unless-stopped
+    networks:
+      - traefik_proxy
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.browserless-chrome.rule=Host(`chrome.${DOMAINNAME}`)
+      - traefik.http.routers.browserless-chrome.entrypoints=https
+      - traefik.http.routers.browserless-chrome.tls=true
+      - traefik.http.routers.browserless-chrome.tls.options=default
+      - traefik.http.routers.browserless-chrome.middlewares=auth,securityheaders
+      - traefik.http.services.browserless-chrome.loadbalancer.server.port=3000
+      - traefik.docker.network=traefik_proxy
+
+  flexget:
+    image: wiserain/flexget
+    container_name: flexget
+    restart: always
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - FG_WEBUI_PASSWD=${FLEXGET_PASSWORD}
+      - FG_LOG_LEVEL=INFO
+    volumes:
+      - ${USERDIR}/docker/flexget:/config
+      - /video:/video
+    networks:
+      - traefik_proxy
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.flexget.rule=Host(`flexget.${DOMAINNAME}`)
+      - traefik.http.routers.flexget.entrypoints=https
+      - traefik.http.routers.flexget.tls=true
+      - traefik.http.routers.flexget.tls.options=default
+      - traefik.http.routers.flexget.middlewares=securityheaders
+      - traefik.http.services.flexget.loadbalancer.server.port=5050
+      - traefik.docker.network=traefik_proxy
+
+  transmission:
+    image: linuxserver/transmission:latest
+    container_name: transmission
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - TRANSMISSION_WEB_HOME=/transmission-web-control/
+      - USER=${TRANSMISSION_USER}
+      - PASS=${TRANSMISSION_PASS}
+    volumes:
+      - ${USERDIR}/docker/transmission:/config
+      - /TransmissionDL:/downloads
+    ports:
+      - 55016:55016
+      - 9091:9091
+      - 55016:55016/udp
+    restart: unless-stopped
+    networks:
+      traefik_proxy:
+      fw_macvlan:
+        ipv4_address: ${STATICIP_TRANSMISSION}
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.transmission.rule=Host(`transmission.${DOMAINNAME}`)
+      - traefik.http.routers.transmission.entrypoints=https
+      - traefik.http.routers.transmission.tls=true
+      - traefik.http.routers.transmission.tls.options=default
+      - traefik.http.routers.transmission.middlewares=securityheaders
+      - traefik.http.services.transmission.loadbalancer.server.port=9091
+      - traefik.docker.network=traefik_proxy
+
+  filebot-node:
+    image: rednoah/filebot:node
+    container_name: filebot-node
+    restart: always
+    volumes:
+      - ${USERDIR}/docker/filebot:/data
+      - /TransmissionDL:/downloads
+      - /video:/video
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    networks:
+      - traefik_proxy
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.filebot.rule=Host(`filebot.${DOMAINNAME}`)
+      - traefik.http.routers.filebot.entrypoints=https
+      - traefik.http.routers.filebot.tls=true
+      - traefik.http.routers.filebot.tls.options=default
+      - traefik.http.routers.filebot.middlewares=auth,securityheaders
+      - traefik.http.services.filebot.loadbalancer.server.port=5452
       - traefik.docker.network=traefik_proxy
 
   deluge:
@@ -428,26 +370,67 @@ services:
       - traefik.http.services.deluge.loadbalancer.server.port=8112
       - traefik.docker.network=traefik_proxy
 
-  whoami:
-    image: containous/whoami
-    restart: unless-stopped
-    container_name: whoami
+  duplicati:
+    image: linuxserver/duplicati
+    container_name: duplicati
+    restart: always
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
+    volumes:
+      - ${USERDIR}/docker/duplicati:/config
+      - ${USERDIR}:/source
     networks:
       - traefik_proxy
-      - internal
     labels:
       - traefik.enable=true
-      - traefik.http.routers.whoami.rule=Host(`whoami.${DOMAINNAME}`)
-      - traefik.http.routers.whoami.entrypoints=https
-      - traefik.http.routers.whoami.tls=true
-      - traefik.http.routers.whoami.tls.options=default
-      - traefik.http.routers.whoami.middlewares=securityheaders
-      - traefik.http.services.whoami.loadbalancer.server.port=80
+      - traefik.http.routers.duplicati.rule=Host(`duplicati.${DOMAINNAME}`)
+      - traefik.http.routers.duplicati.entrypoints=https
+      - traefik.http.routers.duplicati.tls=true
+      - traefik.http.routers.duplicati.tls.options=default
+      - traefik.http.routers.duplicati.middlewares=auth,securityheaders
+      - traefik.http.services.duplicati.loadbalancer.server.port=8200
       - traefik.docker.network=traefik_proxy
+
+  timemachine:
+    image: mbentley/timemachine:smb
+    container_name: timemachine
+    restart: unless-stopped
+    hostname: timemachine
+    environment:
+      - TM_UID=${PUID}
+      - TM_GID=${PGID}
+      - TM_USERNAME=timemachine
+      - PASSWORD=timemachine
+      - VOLUME_SIZE_LIMIT="500 G"
+    volumes:
+      - /downloads/timemachine:/opt/timemachine
+    networks:
+      fw_macvlan:
+        ipv4_address: ${STATICIP_TIMEMACHINE}
+
+  cloudflare-ddns:
+    container_name: cloudflare-ddns
+    image: oznu/cloudflare-ddns:latest
+    restart: always
+    environment:
+      - API_KEY=${CF_DDNS_TOKEN}
+      - ZONE=${DOMAINNAME}
+      - PROXIED=true
+      - DNS_SERVER=1.1.1.1
+    networks:
+      - traefik_proxy
+
+  watchtower:
+    container_name: watchtower
+    restart: always
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --cleanup
+    networks:
+      - traefik_proxy
 
   homebridge:
     image: oznu/homebridge:latest
@@ -465,110 +448,10 @@ services:
       fw_macvlan:
         ipv4_address: ${STATICIP_HOMEBRIDGE}
 
-  cloudflare-ddns:
-    container_name: cloudflare-ddns
-    image: oznu/cloudflare-ddns:latest
-    restart: always
-    environment:
-      - API_KEY=${CF_DDNS_TOKEN}
-      - ZONE=${DOMAINNAME}
-      - PROXIED=true
-      - DNS_SERVER=1.1.1.1
-    networks:
-      - traefik_proxy
-
-  nginx-cb:
-    image: linuxserver/nginx
-    container_name: nginx-cb
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-    volumes:
-      - ${USERDIR}/docker/nginx/cb:/config
-    restart: unless-stopped
-    networks:
-      - traefik_proxy
-      - internal
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.nginx-cb.rule=HostRegexp(`{subdomain:[a-z\d_-]+}.${CBDOMAINNAME}`, `${CBDOMAINNAME}`)
-      - traefik.http.routers.nginx-cb.entrypoints=https
-      - traefik.http.routers.nginx-cb.tls=true
-      - traefik.http.routers.nginx-cb.tls.options=default
-      - traefik.http.routers.nginx-cb.tls.certresolver=cloudflare
-      - traefik.http.routers.nginx-cb.tls.domains[0].main=${CBDOMAINNAME}
-      - traefik.http.routers.nginx-cb.tls.domains[0].sans=*.${CBDOMAINNAME}
-      - traefik.http.routers.nginx-cb.middlewares=securityheaders
-      - traefik.docker.network=traefik_proxy
-
-  browserless-chrome:
-    image: browserless/chrome
-    container_name: browserless-chrome
-    restart: unless-stopped
-    networks:
-      - traefik_proxy
-      - internal
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.browserless-chrome.rule=Host(`chrome.${DOMAINNAME}`)
-      - traefik.http.routers.browserless-chrome.entrypoints=https
-      - traefik.http.routers.browserless-chrome.tls=true
-      - traefik.http.routers.browserless-chrome.tls.options=default
-      - traefik.http.routers.browserless-chrome.middlewares=auth,securityheaders
-      - traefik.http.services.browserless-chrome.loadbalancer.server.port=3000
-      - traefik.docker.network=traefik_proxy
-
-  prometheus:
-    image: prom/prometheus
-    container_name: prometheus
-    restart: always
-    command: --web.enable-lifecycle  --config.file=/etc/prometheus/prometheus.yml
-    volumes:
-      - ${USERDIR}/docker/prometheus:/etc/prometheus
-      - prometheus-data:/prometheus
-    networks:
-      - traefik_proxy
-      - internal
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.prometheus.rule=Host(`prometheus.${DOMAINNAME}`)
-      - traefik.http.routers.prometheus.entrypoints=https
-      - traefik.http.routers.prometheus.tls=true
-      - traefik.http.routers.prometheus.tls.options=default
-      - traefik.http.routers.prometheus.middlewares=securityheaders,grafanaauth
-      - traefik.http.middlewares.grafanaauth.basicauth.usersfile=/shared/.htpasswd
-      - traefik.http.services.prometheus.loadbalancer.server.port=9090
-      - traefik.docker.network=traefik_proxy
-
-  timemachine:
-    image: mbentley/timemachine:smb
-    container_name: timemachine
-    restart: unless-stopped
-    hostname: timemachine
-    environment:
-      - TM_UID=${PUID}
-      - TM_GID=${PGID}
-      - TM_USERNAME=timemachine
-      - PASSWORD=timemachine
-      - VOLUME_SIZE_LIMIT="500 G"
-    volumes:
-      - /tank/downloads/timemachine:/opt/timemachine
-    networks:
-      fw_macvlan:
-        ipv4_address: ${STATICIP_TIMEMACHINE}
-
 networks:
   traefik_proxy:
     name: traefik_proxy
     external: true
-  internal:
-    name: internal
-    external: true
   fw_macvlan:
     name: fw_macvlan
-    external: true
-
-volumes:
-  prometheus-data:
     external: true
