@@ -48,7 +48,7 @@ services:
       - traefik.http.routers.traefik.tls.domains[0].main=${DOMAINNAME}
       - traefik.http.routers.traefik.tls.domains[0].sans=*.${DOMAINNAME}
       - traefik.http.services.traefik.loadbalancer.server.port=8080
-      - traefik.http.middlewares.auth.basicauth.users=${HTTP_USERNAME}:${HTTP_PASSWORD}
+      - traefik.http.middlewares.auth.basicauth.users=${HTTP_USERNAME}:${HTTP_PASSWORD},${M_USER}:${M_PASSWORD}
       - traefik.http.middlewares.sslredirect.redirectscheme.scheme=https
       - traefik.http.middlewares.securityheaders.headers.forceSTSHeader=true
       - traefik.http.middlewares.securityheaders.headers.stsPreload=true
@@ -197,30 +197,6 @@ services:
       - traefik.http.routers.frank.middlewares=securityheaders
       - traefik.docker.network=traefik_proxy
 
-  nginx-esim:
-    image: linuxserver/nginx
-    container_name: nginx-esim
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-    volumes:
-      - ${USERDIR}/docker/nginx/esim:/config
-    restart: unless-stopped
-    networks:
-      - traefik_proxy
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.esim.rule=Host(`${ESIMDOMAINNAME}`)
-      - traefik.http.routers.esim.entrypoints=https
-      - traefik.http.routers.esim.tls=true
-      - traefik.http.routers.esim.tls.options=default
-      - traefik.http.routers.esim.tls.certresolver=cloudflare
-      - traefik.http.routers.esim.tls.domains[0].main=${ESIMDOMAINNAME}
-      - traefik.http.routers.esim.tls.domains[0].sans=*.${ESIMDOMAINNAME}
-      - traefik.http.routers.esim.middlewares=securityheaders
-      - traefik.docker.network=traefik_proxy
-
   nginx-cb:
     image: linuxserver/nginx
     container_name: nginx-cb
@@ -293,9 +269,10 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-      - TRANSMISSION_WEB_HOME=/transmission-web-control/
+      - TRANSMISSION_WEB_HOME=/config/transmission-web-control-1.6.1-update1/src
       - USER=${TRANSMISSION_USER}
       - PASS=${TRANSMISSION_PASS}
+      - PEERPORT=55016
     volumes:
       - ${USERDIR}/docker/transmission:/config
       - /TransmissionDL:/downloads
@@ -352,7 +329,7 @@ services:
       - TZ=${TZ}
     volumes:
       - ${USERDIR}/docker/deluge:/config
-      - ${USERDIR}/Deluge:/downloads
+      - /downloads/Deluge:/downloads
     ports:
       - "54700:54700"
       - "54700:54700/udp"
