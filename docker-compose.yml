@@ -238,7 +238,8 @@ services:
       - traefik.docker.network=traefik_proxy
 
   flexget:
-    image: wiserain/flexget
+    image: wiserain/flexget:3.5.25
+    #image: wiserain/flexget
     container_name: flexget
     restart: always
     environment:
@@ -263,7 +264,8 @@ services:
       - traefik.docker.network=traefik_proxy
 
   transmission:
-    image: linuxserver/transmission:latest
+    #image: linuxserver/transmission:version-3.00-r8
+    image: linuxserver/transmission
     container_name: transmission
     environment:
       - PUID=${PUID}
