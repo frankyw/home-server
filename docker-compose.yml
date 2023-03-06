@@ -413,25 +413,25 @@ services:
       - traefik.http.services.jackett.loadbalancer.server.port=9117
       - traefik.docker.network=traefik_proxy
 
-  trackarr:
-    container_name: trackarr
-    image: ghcr.io/hotio/trackarr:latest
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
+  autobrr:
+    image: ghcr.io/autobrr/autobrr:latest
+    container_name: autobrr
+    restart: unless-stopped
+    networks:
+      - proxy
     volumes:
-      - ${USERDIR}/docker/trackarr:/config
+      - ${USERDIR}/docker/autobrr:/config
     networks:
       - traefik_proxy
+    user: ${PUID}:${PGID}
     labels:
       - traefik.enable=true
-      - traefik.http.routers.trackarr.rule=Host(`trackarr.${DOMAINNAME}`)
-      - traefik.http.routers.trackarr.entrypoints=https
-      - traefik.http.routers.trackarr.tls=true
-      - traefik.http.routers.trackarr.tls.options=default
-      - traefik.http.routers.trackarr.middlewares=securityheaders
-      - traefik.http.services.trackarr.loadbalancer.server.port=7337
+      - traefik.http.routers.autobrr.rule=Host(`autobrr.${DOMAINNAME}`)
+      - traefik.http.routers.autobrr.entrypoints=https
+      - traefik.http.routers.autobrr.tls=true
+      - traefik.http.routers.autobrr.tls.options=default
+      - traefik.http.routers.autobrr.middlewares=securityheaders
+      - traefik.http.services.autobrr.loadbalancer.server.port=7474
       - traefik.docker.network=traefik_proxy
 
   unpackerr:
