@@ -11,8 +11,8 @@ The following containers are being run:
 * [hotio/sonarr](https://hotio.dev/containers/sonarr/) - Management and automation of TV Show downloading.
 * [hotio/radarr](https://hotio.dev/containers/radarr/) - Management and automation of Movie downloading.
 * [hotio/unpackerr](https://hotio.dev/containers/unpackerr/) - Very nice container to handle compressed archives cleanly.
-* [hotio/trackarr](https://hotio.dev/containers/trackarr/) - Get releases within seconds from IRC Announce Channels, and pass to Sonarr.
 * [hotio/jackett](https://hotio.dev/containers/jackett/) - API Support for my trackers, to provide content to Sonarr and Radarr.
+* [autobrr/autobrr](https://autobrr.com/installation/docker) - Get releases within seconds from IRC Announce Channels, and pass to Sonarr.
 
 ### LinuxServer
 
