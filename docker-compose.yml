@@ -237,32 +237,6 @@ services:
       - traefik.http.services.browserless-chrome.loadbalancer.server.port=3000
       - traefik.docker.network=traefik_proxy
 
-  flexget:
-    image: wiserain/flexget:3.5.25
-    #image: wiserain/flexget
-    container_name: flexget
-    restart: always
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-      - FG_WEBUI_PASSWD=${FLEXGET_PASSWORD}
-      - FG_LOG_LEVEL=INFO
-    volumes:
-      - ${USERDIR}/docker/flexget:/config
-      - /video:/video
-    networks:
-      - traefik_proxy
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.flexget.rule=Host(`flexget.${DOMAINNAME}`)
-      - traefik.http.routers.flexget.entrypoints=https
-      - traefik.http.routers.flexget.tls=true
-      - traefik.http.routers.flexget.tls.options=default
-      - traefik.http.routers.flexget.middlewares=securityheaders
-      - traefik.http.services.flexget.loadbalancer.server.port=5050
-      - traefik.docker.network=traefik_proxy
-
   transmission:
     #image: linuxserver/transmission:version-3.00-r8
     image: linuxserver/transmission
@@ -371,6 +345,107 @@ services:
       - traefik.http.routers.duplicati.middlewares=auth,securityheaders
       - traefik.http.services.duplicati.loadbalancer.server.port=8200
       - traefik.docker.network=traefik_proxy
+
+  sonarr:
+    container_name: sonarr
+    image: ghcr.io/hotio/sonarr:v4
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${USERDIR}/docker/sonarr:/config
+      - /video:/video
+      - /TransmissionDL:/downloads
+    networks:
+      - traefik_proxy
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.sonarr.rule=Host(`sonarr.${DOMAINNAME}`)
+      - traefik.http.routers.sonarr.entrypoints=https
+      - traefik.http.routers.sonarr.tls=true
+      - traefik.http.routers.sonarr.tls.options=default
+      - traefik.http.routers.sonarr.middlewares=securityheaders
+      - traefik.http.services.sonarr.loadbalancer.server.port=8989
+      - traefik.docker.network=traefik_proxy
+
+  radarr:
+    container_name: radarr
+    image: ghcr.io/hotio/radarr:latest
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${USERDIR}/docker/radarr:/config
+      - /video:/video
+      - /TransmissionDL:/downloads
+    networks:
+      - traefik_proxy
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.radarr.rule=Host(`radarr.${DOMAINNAME}`)
+      - traefik.http.routers.radarr.entrypoints=https
+      - traefik.http.routers.radarr.tls=true
+      - traefik.http.routers.radarr.tls.options=default
+      - traefik.http.routers.radarr.middlewares=securityheaders
+      - traefik.http.services.radarr.loadbalancer.server.port=7878
+      - traefik.docker.network=traefik_proxy
+
+  jackett:
+    container_name: jackett
+    image: ghcr.io/hotio/jackett:latest
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${USERDIR}/docker/jackett:/config
+    networks:
+      - traefik_proxy
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.jackett.rule=Host(`jackett.${DOMAINNAME}`)
+      - traefik.http.routers.jackett.entrypoints=https
+      - traefik.http.routers.jackett.tls=true
+      - traefik.http.routers.jackett.tls.options=default
+      - traefik.http.routers.jackett.middlewares=auth,securityheaders
+      - traefik.http.services.jackett.loadbalancer.server.port=9117
+      - traefik.docker.network=traefik_proxy
+
+  trackarr:
+    container_name: trackarr
+    image: ghcr.io/hotio/trackarr:latest
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${USERDIR}/docker/trackarr:/config
+    networks:
+      - traefik_proxy
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.trackarr.rule=Host(`trackarr.${DOMAINNAME}`)
+      - traefik.http.routers.trackarr.entrypoints=https
+      - traefik.http.routers.trackarr.tls=true
+      - traefik.http.routers.trackarr.tls.options=default
+      - traefik.http.routers.trackarr.middlewares=securityheaders
+      - traefik.http.services.trackarr.loadbalancer.server.port=7337
+      - traefik.docker.network=traefik_proxy
+
+  unpackerr:
+    container_name: unpackerr
+    image: ghcr.io/hotio/unpackerr:latest
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${USERDIR}/docker/unpackerr:/config
+      - /TransmissionDL:/downloads
+    networks:
+      - traefik_proxy
 
   timemachine:
     image: mbentley/timemachine:smb
