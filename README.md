@@ -23,10 +23,10 @@ I like LinuxServer because they greatly simplify my life with support for user m
 * [linuxserver/transmission](https://hub.docker.com/r/linuxserver/transmission/) - Another good linuxserver container, used as part of my automated media centre in conjunction with the *arr stack above.
 * [linuxserver/unifi-controller](https://hub.docker.com/r/linuxserver/unifi-controller) - Latest stable of Ubiquiti Unifi controller for home network management.
 * [linuxserver/duplicati](https://hub.docker.com/r/linuxserver/duplicati) - Duplicati container, backs up important files on my Linux server files to Google Drive.
+* [linuxserver/mariadb](hhttps://docs.linuxserver.io/images/docker-mariadb) - LinuxServer MariaDB image.
 
 ### Other
 * [traefik:latest](https://hub.docker.com/_/traefik) - Official Traefik container, reverse proxy to expose docker services over TLS using Let's Encrypt.
-* [mariadb:latest](https://hub.docker.com/_/mariadb) - Official MariaDB image.
 * [portainer/portainer](https://hub.docker.com/r/portainer/portainer) - Official Portainer image, container management made easy.
 * [phpmyadmin/phpmyadmin](https://hub.docker.com/r/phpmyadmin/phpmyadmin) - Offical phpMyAdmin image for DB fiddling.
 * [rednoah/filebot:node](https://hub.docker.com/r/rednoah/filebot/) - Headless Filebot container for media management (probably no longer needed after migration to *arr stack).

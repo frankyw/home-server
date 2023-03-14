@@ -109,7 +109,7 @@ services:
       - traefik.docker.network=traefik_proxy
 
   unifi-controller:
-    image: linuxserver/unifi-controller
+    image: lscr.io/linuxserver/unifi-controller:latest
     container_name: unifi-controller
     restart: always
     volumes:
@@ -143,7 +143,7 @@ services:
       - traefik.docker.network=traefik_proxy
 
   mariadb:
-    image: linuxserver/mariadb
+    image: lscr.io/linuxserver/mariadb:latest
     container_name: mariadb
     restart: always
     environment:
@@ -177,7 +177,7 @@ services:
       - traefik.docker.network=traefik_proxy
 
   nginx-frank:
-    image: linuxserver/nginx
+    image: lscr.io/linuxserver/nginx:latest
     container_name: nginx-frank
     environment:
       - PUID=${PUID}
@@ -198,7 +198,7 @@ services:
       - traefik.docker.network=traefik_proxy
 
   nginx-cb:
-    image: linuxserver/nginx
+    image: lscr.io/linuxserver/nginx:latest
     container_name: nginx-cb
     environment:
       - PUID=${PUID}
@@ -238,8 +238,8 @@ services:
       - traefik.docker.network=traefik_proxy
 
   transmission:
-    image: linuxserver/transmission:version-3.00-r8
-    #image: linuxserver/transmission
+    image: lscr.io/linuxserver/transmission:version-3.00-r8
+    #image: lscr.io/linuxserver/transmission:latest
     container_name: transmission
     environment:
       - PUID=${PUID}
@@ -296,7 +296,7 @@ services:
       - traefik.docker.network=traefik_proxy
 
   deluge:
-    image: linuxserver/deluge:2.0.5
+    image: lscr.io/linuxserver/deluge:latest
     restart: unless-stopped
     container_name: deluge
     environment:
@@ -324,7 +324,7 @@ services:
       - traefik.docker.network=traefik_proxy
 
   duplicati:
-    image: linuxserver/duplicati
+    image: lscr.io/linuxserver/duplicati:latest
     container_name: duplicati
     restart: always
     environment:
@@ -388,7 +388,7 @@ services:
       - traefik.http.routers.radarr.entrypoints=https
       - traefik.http.routers.radarr.tls=true
       - traefik.http.routers.radarr.tls.options=default
-      - traefik.http.routers.radarr.middlewares=securityheaders
+      - traefik.http.routers.radarr.middlewares=auth,securityheaders
       - traefik.http.services.radarr.loadbalancer.server.port=7878
       - traefik.docker.network=traefik_proxy
 
