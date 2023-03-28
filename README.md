@@ -29,7 +29,6 @@ I like LinuxServer because they greatly simplify my life with support for user m
 * [traefik:latest](https://hub.docker.com/_/traefik) - Official Traefik container, reverse proxy to expose docker services over TLS using Let's Encrypt.
 * [portainer/portainer](https://hub.docker.com/r/portainer/portainer) - Official Portainer image, container management made easy.
 * [phpmyadmin/phpmyadmin](https://hub.docker.com/r/phpmyadmin/phpmyadmin) - Offical phpMyAdmin image for DB fiddling.
-* [rednoah/filebot:node](https://hub.docker.com/r/rednoah/filebot/) - Headless Filebot container for media management (probably no longer needed after migration to *arr stack).
 * [containrrr/watchtower](https://hub.docker.com/r/containrrr/watchtower) - Official Watchtower image to update all containers.
 * [oznu/homebridge](https://hub.docker.com/r/oznu/homebridge/) - Provides Apple Homekit functionality to non-supported devices on my network.
 * [oznu/cloudflare-ddns](https://hub.docker.com/r/oznu/cloudflare-ddns) - Cloudflare dynamic DNS updater.

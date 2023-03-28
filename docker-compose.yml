@@ -271,30 +271,6 @@ services:
       - traefik.http.services.transmission.loadbalancer.server.port=9091
       - traefik.docker.network=traefik_proxy
 
-  filebot-node:
-    image: rednoah/filebot:node
-    container_name: filebot-node
-    restart: always
-    volumes:
-      - ${USERDIR}/docker/filebot:/data
-      - /TransmissionDL:/downloads
-      - /video:/video
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-    networks:
-      - traefik_proxy
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.filebot.rule=Host(`filebot.${DOMAINNAME}`)
-      - traefik.http.routers.filebot.entrypoints=https
-      - traefik.http.routers.filebot.tls=true
-      - traefik.http.routers.filebot.tls.options=default
-      - traefik.http.routers.filebot.middlewares=auth,securityheaders
-      - traefik.http.services.filebot.loadbalancer.server.port=5452
-      - traefik.docker.network=traefik_proxy
-
   deluge:
     image: lscr.io/linuxserver/deluge:latest
     restart: unless-stopped
@@ -417,8 +393,6 @@ services:
     image: ghcr.io/autobrr/autobrr:latest
     container_name: autobrr
     restart: unless-stopped
-    networks:
-      - proxy
     volumes:
       - ${USERDIR}/docker/autobrr:/config
     networks:
