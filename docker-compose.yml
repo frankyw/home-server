@@ -179,13 +179,13 @@ services:
   nginx-frank:
     image: lscr.io/linuxserver/nginx:latest
     container_name: nginx-frank
+    restart: always
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
     volumes:
       - ${USERDIR}/docker/nginx/frankw:/config
-    restart: unless-stopped
     networks:
       - traefik_proxy
     labels:
@@ -200,13 +200,13 @@ services:
   nginx-cb:
     image: lscr.io/linuxserver/nginx:latest
     container_name: nginx-cb
+    restart: always
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
     volumes:
       - ${USERDIR}/docker/nginx/cb:/config
-    restart: unless-stopped
     networks:
       - traefik_proxy
     labels:
@@ -224,7 +224,7 @@ services:
   browserless-chrome:
     image: browserless/chrome
     container_name: browserless-chrome
-    restart: unless-stopped
+    restart: always
     networks:
       - traefik_proxy
     labels:
@@ -241,6 +241,7 @@ services:
     image: lscr.io/linuxserver/transmission:version-3.00-r8
     #image: lscr.io/linuxserver/transmission:latest
     container_name: transmission
+    restart: always
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -256,7 +257,6 @@ services:
       - 55016:55016
       - 9091:9091
       - 55016:55016/udp
-    restart: unless-stopped
     networks:
       traefik_proxy:
       fw_macvlan:
@@ -273,8 +273,8 @@ services:
 
   deluge:
     image: lscr.io/linuxserver/deluge:latest
-    restart: unless-stopped
     container_name: deluge
+    restart: always
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -323,8 +323,9 @@ services:
       - traefik.docker.network=traefik_proxy
 
   sonarr:
-    container_name: sonarr
     image: ghcr.io/hotio/sonarr:v4
+    container_name: sonarr
+    restart: always
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -346,8 +347,9 @@ services:
       - traefik.docker.network=traefik_proxy
 
   radarr:
-    container_name: radarr
     image: ghcr.io/hotio/radarr:latest
+    container_name: radarr
+    restart: always
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -364,13 +366,14 @@ services:
       - traefik.http.routers.radarr.entrypoints=https
       - traefik.http.routers.radarr.tls=true
       - traefik.http.routers.radarr.tls.options=default
-      - traefik.http.routers.radarr.middlewares=auth,securityheaders
+      - traefik.http.routers.radarr.middlewares=securityheaders
       - traefik.http.services.radarr.loadbalancer.server.port=7878
       - traefik.docker.network=traefik_proxy
 
   jackett:
-    container_name: jackett
     image: ghcr.io/hotio/jackett:latest
+    container_name: jackett
+    restart: always
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -392,7 +395,7 @@ services:
   autobrr:
     image: ghcr.io/autobrr/autobrr:latest
     container_name: autobrr
-    restart: unless-stopped
+    restart: always
     volumes:
       - ${USERDIR}/docker/autobrr:/config
     networks:
@@ -409,8 +412,9 @@ services:
       - traefik.docker.network=traefik_proxy
 
   unpackerr:
-    container_name: unpackerr
     image: ghcr.io/hotio/unpackerr:latest
+    container_name: unpackerr
+    restart: always
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -424,7 +428,7 @@ services:
   timemachine:
     image: mbentley/timemachine:smb
     container_name: timemachine
-    restart: unless-stopped
+    restart: always
     hostname: timemachine
     environment:
       - TM_UID=${PUID}
@@ -439,8 +443,8 @@ services:
         ipv4_address: ${STATICIP_TIMEMACHINE}
 
   cloudflare-ddns:
-    container_name: cloudflare-ddns
     image: oznu/cloudflare-ddns:latest
+    container_name: cloudflare-ddns
     restart: always
     environment:
       - API_KEY=${CF_DDNS_TOKEN}
@@ -451,9 +455,9 @@ services:
       - traefik_proxy
 
   watchtower:
+    image: containrrr/watchtower
     container_name: watchtower
     restart: always
-    image: containrrr/watchtower
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     command: --cleanup
@@ -462,8 +466,8 @@ services:
 
   homebridge:
     image: oznu/homebridge:latest
-    restart: always
     container_name: homebridge
+    restart: always
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
