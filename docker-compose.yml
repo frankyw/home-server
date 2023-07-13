@@ -442,6 +442,16 @@ services:
       fw_macvlan:
         ipv4_address: ${STATICIP_TIMEMACHINE}
 
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    environment:
+      - LOG_LEVEL=info
+      - LOG_HTML=false
+      - CAPTCHA_SOLVER=${CAPTCHA_SOLVER:-none}
+      - TZ=${TZ}
+    restart: unless-stopped
+
   cloudflare-ddns:
     image: oznu/cloudflare-ddns:latest
     container_name: cloudflare-ddns
