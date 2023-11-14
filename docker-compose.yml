@@ -237,39 +237,65 @@ services:
       - traefik.http.services.browserless-chrome.loadbalancer.server.port=3000
       - traefik.docker.network=traefik_proxy
 
-  transmission:
-    image: lscr.io/linuxserver/transmission:version-3.00-r8
-    #image: lscr.io/linuxserver/transmission:latest
-    container_name: transmission
+  qbittorrent-nox:
+    container_name: qbittorrent-nox
+    image: qbittorrentofficial/qbittorrent-nox:${QBT_VERSION}
     restart: always
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-      - TRANSMISSION_WEB_HOME=/config/transmission-web-control-1.6.1-update1/src
-      - USER=${TRANSMISSION_USER}
-      - PASS=${TRANSMISSION_PASS}
-      - PEERPORT=55016
+      - QBT_VERSION=latest
+      - QBT_WEBUI_PORT=8080
+      - QBT_EULA=accept
+    stop_grace_period: 10m
+    tmpfs:
+      - /tmp
+    tty: true
     volumes:
-      - ${USERDIR}/docker/transmission:/config
+      - ${USERDIR}/docker/qbittorrent:/config
       - /TransmissionDL:/downloads
-    ports:
-      - 55016:55016
-      - 9091:9091
-      - 55016:55016/udp
-    networks:
-      traefik_proxy:
-      fw_macvlan:
-        ipv4_address: ${STATICIP_TRANSMISSION}
+    network_mode: service:gluetun_tg
     labels:
       - traefik.enable=true
-      - traefik.http.routers.transmission.rule=Host(`transmission.${DOMAINNAME}`)
-      - traefik.http.routers.transmission.entrypoints=https
-      - traefik.http.routers.transmission.tls=true
-      - traefik.http.routers.transmission.tls.options=default
-      - traefik.http.routers.transmission.middlewares=securityheaders
-      - traefik.http.services.transmission.loadbalancer.server.port=9091
+      - traefik.http.routers.qbittorrent.rule=Host(`qbit.${DOMAINNAME}`)
+      - traefik.http.routers.qbittorrent.entrypoints=https
+      - traefik.http.routers.qbittorrent.tls=true
+      - traefik.http.routers.qbittorrent.tls.options=default
+      - traefik.http.routers.qbittorrent.middlewares=securityheaders
+      - traefik.http.services.qbittorrent.loadbalancer.server.port=8080
       - traefik.docker.network=traefik_proxy
+
+  qbit_manage:
+    container_name: qbit_manage
+    image: bobokun/qbit_manage
+    volumes:
+      - ${USERDIR}/docker/qbit_manage:/config:rw
+      - /TransmissionDL:/downloads:rw
+    environment:
+      - QBT_SCHEDULE=120
+      - QBT_CONFIG=config.yml
+      - QBT_SHARE_LIMITS=true
+    restart: on-failure:2
+    networks:
+      traefik_proxy:
+
+  gluetun_tg:
+    image: qmcgaw/gluetun
+    container_name: gluetun_tg
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    environment:
+      - VPN_SERVICE_PROVIDER=custom
+      - VPN_TYPE=wireguard
+      - TZ=${TZ}
+      - FIREWALL_VPN_INPUT_PORTS=${GLUETUN_PORT}
+    volumes:
+      - ${USERDIR}/docker/gluetun/torguard.conf:/gluetun/wireguard/wg0.conf
+    networks:
+      traefik_proxy:
 
   deluge:
     image: lscr.io/linuxserver/deluge:latest
