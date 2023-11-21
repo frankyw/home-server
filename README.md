@@ -18,18 +18,18 @@ The following containers are being run:
 
 I like LinuxServer because they greatly simplify my life with support for user mappings (PGID, PUID), to avoid file permission problems with mounted host directories.
 
-* [linuxserver/nginx](https://hub.docker.com/r/linuxserver/nginx/) - A good nginx/PHP container with alpine base and support for user/group identifiers.
-* [linuxserver/deluge](https://hub.docker.com/r/linuxserver/deluge/) - A good Deluge container, which I used for manual downloading of files.
-* [linuxserver/unifi-controller](https://hub.docker.com/r/linuxserver/unifi-controller) - Latest stable of Ubiquiti Unifi controller for home network management.
-* [linuxserver/duplicati](https://hub.docker.com/r/linuxserver/duplicati) - Duplicati container, backs up important files on my Linux server files to Google Drive.
-* [linuxserver/mariadb](hhttps://docs.linuxserver.io/images/docker-mariadb) - LinuxServer MariaDB image.
+* [linuxserver/qbittorrent](https://docs.linuxserver.io/images/docker-qbittorrent/) - Got fed up [Transmission 4.0 slow speeds](https://github.com/transmission/transmission/issues/5261), and decided to switch to qBittorent.
+* [linuxserver/deluge](https://docs.linuxserver.io/images/docker-deluge/) - A good Deluge container, which I used for manual downloading of files.
+* [linuxserver/unifi-controller](https://docs.linuxserver.io/images/docker-unifi-controller) - Latest stable of Ubiquiti Unifi controller to manage home UniFi gear.
+* [linuxserver/duplicati](https://docs.linuxserver.io/images/docker-duplicati) - Duplicati container, backs up important files on my Linux server files to Google Drive.
+* [linuxserver/mariadb](https://docs.linuxserver.io/images/docker-mariadb) - LinuxServer MariaDB image.
+* [linuxserver/nginx](https://docs.linuxserver.io/images/docker-nginx/) - A good nginx/PHP container with alpine base for those few php sites I have (shrinking yearly).
 
 ### Other
 * [traefik:latest](https://hub.docker.com/_/traefik) - Official Traefik container, reverse proxy to expose docker services over TLS using Let's Encrypt.
 * [portainer/portainer](https://hub.docker.com/r/portainer/portainer) - Official Portainer image, container management made easy.
-* [qbittorrentofficial/qbittorrent-nox](https://hub.docker.com/r/qbittorrentofficial/qbittorrent-nox) - Got fed up Transmission 4.0 slow speeds, and decided to switch to qBittorent (and it's much faster)
-* [bobokun/qbit_manage](https://hub.docker.com/r/bobokun/qbit_manage) - Very helpful program to cleanup qbitorrent torrents.
-* [qmcgaw/gluetun](https://hub.docker.com/r/qmcgaw/gluetun) - Got fed up dealing with OPNsense selective Wireguard routing configuration, this is just way simpler, and it's virtualized just like OPNsense anyway.
+* [bobokun/qbit_manage](https://hub.docker.com/r/bobokun/qbit_manage) - Very helpful program to cleanup qBitorrent torrents.
+* [qmcgaw/gluetun](https://hub.docker.com/r/qmcgaw/gluetun) - Got completely fed up dealing with OPNsense selective Wireguard routing configuration, this is just way simpler, and they are both virtualized anyway so no tangible performance difference vs OPNsense.
 * [phpmyadmin/phpmyadmin](https://hub.docker.com/r/phpmyadmin/phpmyadmin) - Offical phpMyAdmin image for DB fiddling.
 * [containrrr/watchtower](https://hub.docker.com/r/containrrr/watchtower) - Official Watchtower image to update all containers.
 * [oznu/homebridge](https://hub.docker.com/r/oznu/homebridge/) - Provides Apple Homekit functionality to non-supported devices on my network.
