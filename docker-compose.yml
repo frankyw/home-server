@@ -290,7 +290,7 @@ services:
       - TZ=${TZ}
       - FIREWALL_VPN_INPUT_PORTS=${GLUETUN_PORT}
     volumes:
-      - ${USERDIR}/docker/gluetun/torguard.conf:/gluetun/wireguard/wg0.conf
+      - ${USERDIR}/docker/gluetun/purevpn.conf:/gluetun/wireguard/wg0.conf
     networks:
       traefik_proxy:
 
