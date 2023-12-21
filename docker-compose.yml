@@ -248,7 +248,7 @@ services:
     volumes:
       - ${USERDIR}/docker/qbittorrent:/config
       - /TransmissionDL:/downloads
-    network_mode: service:gluetun_tg
+    network_mode: service:gluetun
     restart: always
     labels:
       - traefik.enable=true
@@ -259,6 +259,16 @@ services:
       - traefik.http.routers.qbittorrent.middlewares=securityheaders
       - traefik.http.services.qbittorrent.loadbalancer.server.port=8080
       - traefik.docker.network=traefik_proxy
+
+  qbittools:
+    container_name: qbittools
+    image: registry.gitlab.com/alexkm/qbittools
+    volumes:
+      - ${USERDIR}/docker/qbittorrent/qBittorrent:/qBittorrent
+    command: reannounce -s gluetun:8080
+    restart: unless-stopped
+    networks:
+      traefik_proxy:
 
   qbit_manage:
     container_name: qbit_manage
@@ -276,9 +286,9 @@ services:
     networks:
       traefik_proxy:
 
-  gluetun_tg:
+  gluetun:
     image: qmcgaw/gluetun
-    container_name: gluetun_tg
+    container_name: gluetun
     restart: always
     cap_add:
       - NET_ADMIN
